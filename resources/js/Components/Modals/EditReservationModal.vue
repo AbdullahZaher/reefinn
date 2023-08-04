@@ -33,9 +33,11 @@ const _form = useForm({
     guest_phone: props.reservation.guest_phone,
     number_of_companions: props.reservation.number_of_companions,
     copy: props.reservation.copy,
-    price_for_night: props.reservation.price_for_night,
+    price_for_night: props.reservation.price_for_night.replace(",", ""),
     total_price: props.reservation.total_price,
+    discount: props.reservation.discount,
     note: props.reservation.note,
+    amounts_due: props.reservation.amounts_due.replace(",", ""),
 });
 
 const updateTotalPrice = () => {
@@ -51,8 +53,12 @@ const updateTotalPrice = () => {
         let numberOfNights = Math.ceil(timeDiff / (1000 * 3600 * 24));
         if (_form.checkin == _form.checkout) numberOfNights = 1;
 
-        totalPrice = _form.price_for_night * numberOfNights;
+        totalPrice =
+            _form.price_for_night * numberOfNights -
+            (_form.discount / 100) * _form.price_for_night * numberOfNights;
     }
+
+    if (totalPrice < 0) totalPrice = 0;
 
     _form.total_price = `${new Intl.NumberFormat("en-US", {
         maximumFractionDigits: 2,
@@ -61,6 +67,11 @@ const updateTotalPrice = () => {
 };
 updateTotalPrice();
 watch(_form, updateTotalPrice);
+
+const discountBlurHandler = (event) => {
+    _form.discount = (Math.trunc(_form.discount * 100) / 100).toFixed(2);
+    event.target.value = _form.discount;
+};
 
 const _submitHandler = () => {
     _form.clearErrors();
@@ -101,6 +112,7 @@ const _submitHandler = () => {
                         class="block mb-2 text-sm font-medium text-gray-900"
                     >
                         {{ __("Guest Name") }}
+                        <span class="text-red-600 text-sm">*</span>
                     </label>
                     <input
                         id="name"
@@ -119,6 +131,7 @@ const _submitHandler = () => {
                         class="block mb-2 text-sm font-medium text-gray-900"
                     >
                         {{ __("Guest Phone") }}
+                        <span class="text-red-600 text-sm">*</span>
                     </label>
                     <input
                         id="phone"
@@ -139,6 +152,7 @@ const _submitHandler = () => {
                         class="block mb-2 text-sm font-medium text-gray-900"
                     >
                         {{ __("Guest ID") }}
+                        <span class="text-red-600 text-sm">*</span>
                     </label>
                     <input
                         id="guest_id"
@@ -157,18 +171,20 @@ const _submitHandler = () => {
                         class="block mb-2 text-sm font-medium text-gray-900"
                     >
                         {{ __("Guest Birthday") }}
+                        <span class="text-red-600 text-sm">*</span>
                     </label>
                     <SwitchableDatePicker v-model="_form.guest_birthday" />
                     <p class="text-sm text-red-600 mt-3 text-center">
                         {{ _form.errors.guest_birthday }}
                     </p>
                 </div>
-                <div class="flex-1 w-full md:flex-initial md:w-20">
+                <div class="flex-1 w-full md:flex-initial md:w-24">
                     <label
                         for="number_of_companions"
                         class="block mb-2 text-sm font-medium text-gray-900"
                     >
                         {{ __("Number Of Companions") }}
+                        <span class="text-red-600 text-sm">*</span>
                     </label>
                     <input
                         id="number_of_companions"
@@ -184,12 +200,13 @@ const _submitHandler = () => {
                         {{ _form.errors.number_of_companions }}
                     </p>
                 </div>
-                <div class="flex-1 w-full md:flex-initial md:w-20">
+                <div class="flex-1 w-full md:flex-initial md:w-24">
                     <label
                         for="copy"
                         class="block mb-2 text-sm font-medium text-gray-900"
                     >
                         {{ __("Copy") }}
+                        <span class="text-red-600 text-sm">*</span>
                     </label>
                     <input
                         id="copy"
@@ -213,6 +230,7 @@ const _submitHandler = () => {
                         class="block mb-2 text-sm font-medium text-gray-900"
                     >
                         {{ __("Price For Night") }}
+                        <span class="text-red-600 text-sm">*</span>
                     </label>
                     <input
                         id="price_for_night"
@@ -248,6 +266,36 @@ const _submitHandler = () => {
                         disabled
                     />
                 </div>
+                <div class="flex-1 w-full">
+                    <label
+                        for="discount"
+                        class="block mb-2 text-sm font-medium text-gray-900"
+                    >
+                        {{ __("Discount") }}
+                        <span class="text-red-600 text-sm">*</span>
+                    </label>
+                    <div class="relative">
+                        <input
+                            id="discount"
+                            type="number"
+                            min="0"
+                            :max="$page.props.auth.user.max_discount"
+                            step="0.1"
+                            v-model="_form.discount"
+                            @blur="discountBlurHandler"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ltr:pr-10 rtl:pl-10"
+                            required
+                        />
+                        <span
+                            class="absolute top-1/2 transform -translate-y-1/2 ltr:right-3 rtl:left-3 text-lg font-medium select-none"
+                        >
+                            %
+                        </span>
+                    </div>
+                    <p class="text-sm text-red-600 mt-1">
+                        {{ _form.errors.discount }}
+                    </p>
+                </div>
             </div>
             <div class="mb-6 flex gap-6 w-full flex-col md:flex-row">
                 <div class="flex-1 w-full">
@@ -256,6 +304,7 @@ const _submitHandler = () => {
                         class="block mb-2 text-sm font-medium text-gray-900"
                     >
                         {{ __("Check-in") }}
+                        <span class="text-red-600 text-sm">*</span>
                     </label>
                     <SwitchableDatePicker v-model="_form.checkin" />
                     <p class="text-sm text-red-600 mt-3 text-center">
@@ -268,6 +317,7 @@ const _submitHandler = () => {
                         class="block mb-2 text-sm font-medium text-gray-900"
                     >
                         {{ __("Check-out") }}
+                        <span class="text-red-600 text-sm">*</span>
                     </label>
                     <SwitchableDatePicker v-model="_form.checkout" />
                     <p class="text-sm text-red-600 mt-3 text-center">
@@ -275,6 +325,7 @@ const _submitHandler = () => {
                     </p>
                 </div>
             </div>
+
             <div class="mb-6 w-full">
                 <label
                     for="note"
@@ -291,17 +342,39 @@ const _submitHandler = () => {
                 <p class="text-sm text-red-600 mt-1">{{ _form.errors.note }}</p>
             </div>
 
+            <div class="mb-6 w-full">
+                <label
+                    for="amounts_due"
+                    class="block mb-2 text-sm font-medium text-gray-900"
+                >
+                    {{ __("Amounts Due") }}
+                    <span class="text-red-600 text-sm">*</span>
+                </label>
+                <input
+                    id="amounts_due"
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    v-model="_form.amounts_due"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                    required
+                />
+                <p class="text-sm text-red-600 mt-1">
+                    {{ _form.errors.amounts_due }}
+                </p>
+            </div>
+
             <div
                 class="flex items-center justify-between"
                 :class="[
                     $page.props.auth.user.can.includes('transfer reservations')
                         ? 'w-full'
-                        : 'ml-auto rtl:mr-auto rtl:ml-0',
+                        : 'ltr:ml-auto rtl:mr-auto',
                 ]"
             >
                 <button
                     type="button"
-                    class="text-blue-700 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 hover:text-blue-800"
+                    class="text-blue-700 focus:outline-none font-medium rounded-lg text-sm py-2.5 hover:text-blue-800"
                     @click="isTransferGuestModalOpen = true"
                     v-if="
                         $page.props.auth.user.can.includes(

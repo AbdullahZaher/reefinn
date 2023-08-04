@@ -47,6 +47,7 @@ const _submitHandler = () => {
                     class="block mb-2 text-sm font-medium text-gray-900"
                 >
                     {{ __("Name") }}
+                    <span class="text-red-600 text-sm">*</span>
                 </label>
                 <input
                     id="name"
@@ -82,6 +83,7 @@ const _submitHandler = () => {
                     class="block mb-2 text-sm font-medium text-gray-900"
                 >
                     {{ __("Default Price For Night") }}
+                    <span class="text-red-600 text-sm">*</span>
                 </label>
                 <input
                     id="price_for_night"

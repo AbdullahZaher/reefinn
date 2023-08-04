@@ -110,7 +110,7 @@ watch(
                                 >
                                     <tr>
                                         <th scope="col" class="px-6 py-3">
-                                            {{ __("ID") }}
+                                            {{ __("Reservation Number") }}
                                         </th>
                                         <th scope="col" class="px-6 py-3">
                                             {{ __("State") }}
@@ -131,7 +131,16 @@ watch(
                                             {{ __("Total Price") }}
                                         </th>
                                         <th scope="col" class="px-6 py-3">
+                                            {{ __("Discount") }}
+                                        </th>
+                                        <th scope="col" class="px-6 py-3">
+                                            {{ __("Amounts Due") }}
+                                        </th>
+                                        <th scope="col" class="px-6 py-3">
                                             {{ __("Guest") }}
+                                        </th>
+                                        <th scope="col" class="px-6 py-3">
+                                            {{ __("Employee Name") }}
                                         </th>
                                         <th scope="col" class="px-6 py-3">
                                             {{ __("Created At") }}

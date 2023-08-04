@@ -24,6 +24,11 @@ import {
     faPrint,
     faWrench,
     faUnlock,
+    faClockRotateLeft,
+    faBuilding,
+    faUsers,
+    faMoneyBills,
+    faMoneyBillTransfer,
 } from "@fortawesome/free-solid-svg-icons";
 
 export default function initFontawesome() {
@@ -45,7 +50,12 @@ export default function initFontawesome() {
         faCaretDown,
         faPrint,
         faWrench,
-        faUnlock
+        faUnlock,
+        faClockRotateLeft,
+        faBuilding,
+        faUsers,
+        faMoneyBills,
+        faMoneyBillTransfer
     );
 
     return FontAwesomeIcon;

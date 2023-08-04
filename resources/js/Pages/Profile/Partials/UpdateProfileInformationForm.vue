@@ -43,11 +43,13 @@ const form = useForm({
         </header>
 
         <form
-            @submit.prevent="form.patch(route('profile.update'))"
+            @submit.prevent="
+                form.patch(route('profile.update'), { preserveScroll: true })
+            "
             class="mt-6 space-y-6"
         >
             <div>
-                <InputLabel for="name" :value="__('Name')" />
+                <InputLabel for="name" :value="__('Name')" required />
 
                 <TextInput
                     id="name"
@@ -55,15 +57,13 @@ const form = useForm({
                     class="mt-1 block w-full"
                     v-model="form.name"
                     required
-                    autofocus
-                    autocomplete="name"
                 />
 
                 <InputError class="mt-2" :message="form.errors.name" />
             </div>
 
             <div>
-                <InputLabel for="email" :value="__('Email')" />
+                <InputLabel for="email" :value="__('Email')" required />
 
                 <TextInput
                     id="email"
@@ -71,14 +71,13 @@ const form = useForm({
                     class="mt-1 block w-full"
                     v-model="form.email"
                     required
-                    autocomplete="username"
                 />
 
                 <InputError class="mt-2" :message="form.errors.email" />
             </div>
 
             <div>
-                <InputLabel for="timezones" :value="__('Timezone')" />
+                <InputLabel for="timezones" :value="__('Timezone')" required />
 
                 <select
                     id="timezones"
@@ -100,7 +99,7 @@ const form = useForm({
             </div>
 
             <div>
-                <InputLabel for="calendar" :value="__('Calendar')" />
+                <InputLabel for="calendar" :value="__('Calendar')" required />
 
                 <select
                     id="calendar"
@@ -132,19 +131,6 @@ const form = useForm({
                     <Loader v-if="form.processing" />
                     <span>{{ __("Save") }}</span>
                 </PrimaryButton>
-
-                <Transition
-                    enter-from-class="opacity-0"
-                    leave-to-class="opacity-0"
-                    class="transition ease-in-out"
-                >
-                    <p
-                        v-if="form.recentlySuccessful"
-                        class="text-sm text-gray-600"
-                    >
-                        {{ __("Saved.") }}
-                    </p>
-                </Transition>
             </div>
         </form>
     </section>

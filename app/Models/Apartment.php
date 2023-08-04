@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Record;
+use App\Models\ApartmentRecord;
 use App\Models\Reservation;
 use Illuminate\Support\Carbon;
 use Alkoumi\LaravelHijriDate\Hijri;
@@ -37,6 +37,6 @@ class Apartment extends Model
 
     public function records()
     {
-        return $this->hasMany(Record::class);
+        return $this->hasMany(ApartmentRecord::class);
     }
 }

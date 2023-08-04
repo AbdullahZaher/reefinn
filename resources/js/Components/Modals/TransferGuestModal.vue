@@ -51,11 +51,21 @@ const getAvailableApartments = async () => {
             checkout: props.reservation.checkout,
         })
         .then((response) => {
+            if (response.data?.data.length == 0) {
+                return Swal.fire({
+                    icon: "error",
+                    title: __("Sorry..."),
+                    text: __(
+                        "There is no available apartments for this period!"
+                    ),
+                    confirmButtonText: __("Ok"),
+                }).finally(() => emit("close"));
+            }
+
             _apartments.value = response.data.data;
             _form.apartment_id = apartments.value[0].id;
         })
         .catch(async (e) => {
-            console.log(e);
             await Swal.fire({
                 icon: "error",
                 title: __("Sorry..."),
@@ -94,6 +104,7 @@ onMounted(async () => {
                     class="block mb-2 text-sm font-medium text-gray-900"
                 >
                     {{ __("Select an apartment") }}
+                    <span class="text-red-600 text-sm">*</span>
                 </label>
                 <select
                     id="apartments"

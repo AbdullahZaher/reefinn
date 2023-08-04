@@ -2,23 +2,46 @@
 
 namespace App\Models;
 
+use App\Models\User;
 use App\Models\Apartment;
 use Illuminate\Support\Carbon;
+use App\Settings\GeneralSettings;
 use Alkoumi\LaravelHijriDate\Hijri;
 use App\Enums\ReservationStateEnum;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use JamesMills\LaravelTimezone\Facades\Timezone;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Reservation extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $casts = [
         'real_checkin' => 'datetime',
         'real_checkout' => 'datetime',
     ];
+
+    public $appends = [
+        'reservationNumber',
+    ];
+
+    public static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            $model->r_id = rand(100, 999);
+        });
+    }
+
+    protected function reservationNumber(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => app(GeneralSettings::class)->branch_no . $this->id . $this->r_id,
+        );
+    }
 
     protected function guestBirthday(): Attribute
     {
@@ -57,6 +80,10 @@ class Reservation extends Model
     public function apartment()
     {
         return $this->belongsTo(Apartment::class);
+    }
+
+    public function admin() {
+        return $this->belongsTo(User::class, 'admin_id');
     }
 
     public function scopePending($query)

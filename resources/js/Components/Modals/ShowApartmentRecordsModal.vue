@@ -32,6 +32,9 @@ const emit = defineEmits(["close"]);
                         <th scope="col" class="px-6 py-3">
                             {{ __("Reservation") }}
                         </th>
+                        <th scope="col" class="px-6 py-3">
+                            {{ __("Employee Name") }}
+                        </th>
                         <th scope="col" class="px-6 py-3">{{ __("Note") }}</th>
                         <th scope="col" class="px-6 py-3">
                             {{ __("Created At") }}
@@ -109,7 +112,40 @@ const emit = defineEmits(["close"]);
                                         __("SAR")
                                     }}
                                 </p>
+                                <p class="whitespace-nowrap">
+                                    {{ __("Discount") }}:
+                                    <template
+                                        v-if="record.reservation.discount > 0"
+                                    >
+                                        <span class="font-medium">
+                                            {{
+                                                record.reservation.discount +
+                                                "%"
+                                            }}
+                                        </span>
+                                        <span class="text-sm">
+                                            ({{
+                                                record.reservation
+                                                    .discount_amount +
+                                                " " +
+                                                __("SAR")
+                                            }})
+                                        </span>
+                                    </template>
+                                    <span v-else>-</span>
+                                </p>
+                                <p class="whitespace-nowrap">
+                                    {{ __("Amounts Due") }}:
+                                    {{
+                                        record.reservation.amounts_due +
+                                        " " +
+                                        __("SAR")
+                                    }}
+                                </p>
                             </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {{ record.admin_name ?? "-" }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             {{ record.note }}

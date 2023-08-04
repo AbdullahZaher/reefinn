@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::table('reservations', function (Blueprint $table) {
             $table->integer('copy')->default(0.0)->after('guest_id');
-            $table->decimal('price_for_night')->default(0.0)->after('real_checkout');
-            $table->decimal('total_price')->default(0.0)->after('price_for_night');
+            $table->decimal('price_for_night', 16, 2)->default(0.0)->after('real_checkout');
+            $table->decimal('total_price', 16, 2)->default(0.0)->after('price_for_night');
         });
     }
 

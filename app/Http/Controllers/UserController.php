@@ -40,6 +40,7 @@ class UserController extends Controller
             'name' => $request->validated()['name'],
             'email' => $request->validated()['email'],
             'password' => Hash::make($request->validated()['password']),
+            'max_discount' => $request->validated()['max_discount'],
         ]);
 
         $permissions = Permission::whereIn('name', $request->validated()['permissions'])->get();
@@ -54,6 +55,7 @@ class UserController extends Controller
             $user->update([
                 'name' => $request->validated()['name'],
                 'email' => $request->validated()['email'],
+                'max_discount' => $request->validated()['max_discount'],
             ]);
 
             if ($request->validated()['password'])

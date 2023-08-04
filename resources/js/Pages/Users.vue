@@ -98,6 +98,9 @@ const isCreateUserModalOpen = ref(false);
                                             {{ __("Email") }}
                                         </th>
                                         <th scope="col" class="px-6 py-3">
+                                            {{ __("Maximum Discount") }}
+                                        </th>
+                                        <th scope="col" class="px-6 py-3">
                                             {{ __("Actions") }}
                                         </th>
                                     </tr>

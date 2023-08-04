@@ -17,14 +17,12 @@ class ApartmentSeeder extends Seeder
     {
         $i = 0;
 
-        Apartment::factory(
-            [
-                'name' => function () use (&$i) {
-                    return 100 + $i++;
-                },
-                'state' => 1,
-            ]
-        )->count(20)->create();
+        Apartment::factory([
+            'name' => function () use (&$i) {
+                return 100 + $i++;
+            },
+            'state' => 1,
+        ])->count(20)->create();
 
         Apartment::all()->each(
             fn (Apartment $apartment) => $apartment->reservations()->saveMany(

@@ -43,6 +43,7 @@ class HandleInertiaRequests extends Middleware
                     'email' => $user->email,
                     'timezone' => $user->timezone,
                     'calendar' => $user->calendar,
+                    'max_discount' => $user->max_discount,
                     'can' => $user->permissions->pluck('name'),
                 ] : null,
             ],

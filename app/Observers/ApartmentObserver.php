@@ -3,7 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Apartment;
-use App\Models\Record;
+use App\Models\ApartmentRecord;
 
 class ApartmentObserver
 {
@@ -13,11 +13,12 @@ class ApartmentObserver
         $state_to = $apartment->state;
 
         if ($state_from != $state_to) {
-            Record::create([
+            ApartmentRecord::create([
                 'state_from' => $state_from,
                 'state_to' => $state_to,
                 'reservation_id' => $apartment->current_reservation_id ?? $apartment->getOriginal('current_reservation_id'),
                 'apartment_id' => $apartment->id,
+                'user_id' => auth()->id(),
             ]);
         }
     }

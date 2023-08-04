@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\User;
 use App\Models\Apartment;
 use App\Models\Reservation;
 use Illuminate\Support\Carbon;
@@ -11,7 +12,7 @@ use JamesMills\LaravelTimezone\Facades\Timezone;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Record extends Model
+class ApartmentRecord extends Model
 {
     use HasFactory;
 
@@ -32,6 +33,11 @@ class Record extends Model
 
     public function reservation()
     {
-        return $this->belongsTo(Reservation::class);
+        return $this->belongsTo(Reservation::class)->withTrashed();
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

@@ -68,6 +68,9 @@ const deleteUser = () => {
         <td class="px-6 py-4 whitespace-nowrap">
             {{ user.email }}
         </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            {{ user.max_discount + "%" }}
+        </td>
         <td class="px-6 py-4 space-x-5 rtl:space-x-reverse whitespace-nowrap">
             <button
                 type="button"

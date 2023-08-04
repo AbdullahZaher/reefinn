@@ -8,6 +8,7 @@ use App\Models\Reservation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use App\Enums\ApartmentStateEnum;
+use App\Settings\GeneralSettings;
 use Illuminate\Support\Facades\DB;
 use Alkoumi\LaravelHijriDate\Hijri;
 use App\Enums\ReservationStateEnum;
@@ -26,7 +27,11 @@ class ReservationController extends Controller
             'states' => !!strlen((string) $request->get('states')) ? explode(",", (string) $request->get('states')) : $states->pluck('key'),
         ];
 
-        $reservations = Reservation::with('apartment')
+        $reservations = Reservation::query()
+            ->with([
+                'apartment',
+                'admin' => fn ($q) => $q->select(['id', 'name']),
+            ])
             ->whereIn('state', $filters['states'])
             ->latest()
             ->paginate(50);
@@ -41,9 +46,13 @@ class ReservationController extends Controller
         ]);
     }
 
-    public function invoice(Request $request, Reservation $reservation)
+    public function invoice(GeneralSettings $settings, Request $request, Reservation $reservation)
     {
         abort_if(!$request->wantsJson(), 404);
+
+        $hotel = [
+            'logo' => $settings->logo ? 'data:image/png;base64,' . base64_encode(file_get_contents(public_path(app(\App\Settings\GeneralSettings::class)->logo))) : null,
+        ];
 
         $calendar = auth()->user()->calendar;
 
@@ -55,9 +64,11 @@ class ReservationController extends Controller
             'checkin' => $calendar == 'hijri' ? Hijri::Date('j F Y', $checkin) : Carbon::parse($checkin)->translatedFormat('d F Y'),
             'checkout' => $calendar == 'hijri' ? Hijri::Date('j F Y', $checkout) : Carbon::parse($checkout)->translatedFormat('d F Y'),
             'guest_birthday' => $calendar == 'hijri' ? Hijri::Date('j F Y', $guest_birthday) : Carbon::parse($guest_birthday)->translatedFormat('d F Y'),
+            'reservation_lease_terms' => $settings->reservation_lease_terms[app()->getLocale()],
         ];
 
         return view('pdfs.reservation_invoice', [
+            'hotel' => $hotel,
             'reservation' => $reservation,
             'attrs' => $attrs,
         ]);
@@ -65,16 +76,25 @@ class ReservationController extends Controller
 
     public function store(ReservationRequest $request, Apartment $apartment)
     {
+        if ($apartment->state == ApartmentStateEnum::Maintenance->value) return redirect()->back()->with('toast', ['type' => 'success', 'message' => __('Can\'t add reservation for maintenance apartment.')]);
+
         if (!self::check_reservation_date($request->validated()['checkin'], $request->validated()['checkout'], $apartment))
             throw ValidationException::withMessages(['checkin' => __('There is a reservation in this date.')]);
 
         DB::transaction(function () use ($request, $apartment) {
-            $data = $request->validated();
+            $data = $request->validated() + ['admin_id' => auth()->id()];
 
             if (!$request->user()->can('change reservation price for night')) $data['price_for_night'] = $apartment->price_for_night;
 
-            if ($request->validated()['checkin'] == $request->validated()['checkout']) $data['total_price'] = $data['price_for_night'];
-            else $data['total_price'] = $data['price_for_night'] * Carbon::parse($data['checkout'])->diffInDays(Carbon::parse($data['checkin']));
+            $data['number_of_nights'] = Carbon::parse($data['checkout'])->diffInDays(Carbon::parse($data['checkin']));
+            if ($request->validated()['checkin'] == $request->validated()['checkout']) $data['number_of_nights'] = 1;
+
+            $data['total_price'] = $data['price_for_night'] * $data['number_of_nights'];
+
+            $data['discount'] = floor($data['discount'] * 100) / 100;
+            $data['discount_amount'] =  $data['discount'] / 100 * $data['total_price'];
+            $data['discount_amount'] = floor($data['discount_amount'] * 100) / 100;
+            $data['total_price'] -= $data['discount_amount'];
 
             if ((strtotime($request->validated()['checkin']) <= strtotime(Timezone::convertToLocal(now(), 'Y-m-d'))) && ($apartment->state == ApartmentStateEnum::Empty->value || $apartment->state == ApartmentStateEnum::Reserved->value)) {
                 $reservation = Reservation::create($data + [
@@ -166,6 +186,9 @@ class ReservationController extends Controller
     {
         $reservation->load('apartment');
 
+        if ($reservation->apartment->state == ApartmentStateEnum::Maintenance->value) return redirect()->back()->with('toast', ['type' => 'success', 'message' => __('Can\'t edit reservation for maintenance apartment.')]);
+        if ($reservation->state != ReservationStateEnum::Pending->value && $reservation->state != ReservationStateEnum::Checkin->value) return redirect()->back()->with('toast', ['type' => 'error', 'message' => __('There has been an error')]);
+
         if (!self::check_reservation_date($request->validated()['checkin'], $request->validated()['checkout'], $reservation->apartment, $reservation->id))
             throw ValidationException::withMessages(['checkin' => __('There is a reservation in this date.')]);
 
@@ -173,8 +196,15 @@ class ReservationController extends Controller
 
         if (!$request->user()->can('change reservation price for night')) $data['price_for_night'] = $reservation->price_for_night;
 
-        if ($request->validated()['checkin'] == $request->validated()['checkout']) $data['total_price'] = $data['price_for_night'];
-        else $data['total_price'] = $data['price_for_night'] * Carbon::parse($data['checkout'])->diffInDays(Carbon::parse($data['checkin']));
+        $data['number_of_nights'] = Carbon::parse($data['checkout'])->diffInDays(Carbon::parse($data['checkin']));
+        if ($request->validated()['checkin'] == $request->validated()['checkout']) $data['number_of_nights'] = 1;
+
+        $data['total_price'] = $data['price_for_night'] * $data['number_of_nights'];
+
+        $data['discount'] = floor($data['discount'] * 100) / 100;
+        $data['discount_amount'] =  $data['discount'] / 100 * $data['total_price'];
+        $data['discount_amount'] = floor($data['discount_amount'] * 100) / 100;
+        $data['total_price'] -= $data['discount_amount'];
 
         $reservation->update($data);
 
@@ -262,5 +292,21 @@ class ReservationController extends Controller
                 ->whereColumn('checkin->gregorian', '!=', 'checkout->gregorian')
                 ->whereIn('state', [ReservationStateEnum::Pending->value, ReservationStateEnum::Checkin->value])
                 ->exists();
+    }
+
+    public function update_terms(GeneralSettings $settings, Request $request) {
+        $validated = $request->validate([
+            'terms' => ['required', 'array',],
+            'terms.en' => ['required', 'string', 'max:3500',],
+            'terms.ar' => ['required', 'string', 'max:3500',],
+        ]);
+
+        $settings->reservation_lease_terms = [
+            'en' => $validated['terms']['en'],
+            'ar' => $validated['terms']['ar'],
+        ];
+        $settings->save();
+
+        return redirect()->back()->with('toast', ['type' => 'success', 'message' => __('Reservation terms has been updated.')]);
     }
 }

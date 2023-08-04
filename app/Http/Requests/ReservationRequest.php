@@ -25,7 +25,8 @@ class ReservationRequest extends FormRequest
         return [
             'checkin' => $request->method() == 'POST' ? ['required', 'date', 'date_format:Y-m-d', 'after:yesterday',] : ['required', 'date', 'date_format:Y-m-d',],
             'checkout' => ['required', 'date', 'date_format:Y-m-d', 'after_or_equal:checkin',],
-            'price_for_night' => ['required', 'numeric', 'min:0',],
+            'price_for_night' => ['required', 'numeric', 'min:0', 'max:999999.99',],
+            'discount' => ['required', 'numeric', 'min:0', 'max:' . auth()->user()->max_discount, 'max:999999.99',],
             'guest_id' => ['required', 'string', 'max:255',],
             'copy' => ['required', 'integer', 'min:0', 'max:255',],
             'guest_name' => ['required', 'string', 'max:255',],
@@ -33,6 +34,7 @@ class ReservationRequest extends FormRequest
             'guest_birthday' => ['required', 'date', 'date_format:Y-m-d', 'before:yesterday',],
             'number_of_companions' => ['required', 'integer', 'min:0', 'max:50',],
             'note' => ['nullable', 'string'],
+            'amounts_due' => ['required', 'numeric', 'min:0', 'max:999999.99',],
         ];
     }
 
@@ -41,6 +43,7 @@ class ReservationRequest extends FormRequest
         return [
             'checkin.after' => __('Check-in date must be today or after'),
             'guest_birthday.before' => __('Guest birthday is invalid'),
+            'discount.max' => __('You can\'t apply a discount with more than :max', ['max' => auth()->user()->max_discount]),
         ];
     }
 }

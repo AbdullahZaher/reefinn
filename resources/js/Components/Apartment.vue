@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from "vue";
 import { router } from "@inertiajs/vue3";
+import ShowApartmentDetailsModal from "@/Components/Modals/ShowApartmentDetailsModal.vue";
 import ShowApartmentRecordsModal from "@/Components/Modals/ShowApartmentRecordsModal.vue";
 import ShowReservationsModal from "@/Components/Modals/ShowReservationsModal.vue";
 import EditReservationModal from "@/Components/Modals/EditReservationModal.vue";
@@ -15,6 +16,7 @@ const props = defineProps({
     },
 });
 
+const isShowApartmentDetailsModalOpen = ref(false);
 const isShowApartmentRecordsModalOpen = ref(false);
 const isShowReservationsModalOpen = ref(false);
 const isEditReservationModalOpen = ref(false);
@@ -72,28 +74,6 @@ const updateMaintenance = () => {
             }),
     });
 };
-
-const deleteApartment = () => {
-    Swal.fire({
-        title: __("Are you sure?"),
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        cancelButtonText: __("Cancel"),
-        confirmButtonText: __("Yes, delete apartment!"),
-        showLoaderOnConfirm: true,
-        allowOutsideClick: () => !Swal.isLoading(),
-        backdrop: true,
-        preConfirm: () =>
-            new Promise((resolve) => {
-                router.delete(route("apartments.destroy", props.apartment.id), {
-                    preserveScroll: true,
-                    onFinish: resolve,
-                });
-            }),
-    });
-};
 </script>
 
 <template>
@@ -104,9 +84,9 @@ const deleteApartment = () => {
         <button
             type="click"
             class="absolute top-0 p-3"
-            :class="[$page.props.locale.dir == 'ltr' ? 'left-0' : 'right-0']"
-            @click="isShowApartmentRecordsModalOpen = true"
-            v-if="$page.props.auth.user.can.includes('show records')"
+            :class="[$page.props.locale.dir == 'ltr' ? 'right-0' : 'left-0']"
+            @click="isShowApartmentDetailsModalOpen = true"
+            v-if="$page.props.auth.user.can.includes('show apartments')"
         >
             <FontAwesomeIcon
                 icon="fas fa-circle-info"
@@ -117,12 +97,25 @@ const deleteApartment = () => {
         <button
             type="click"
             class="absolute top-0 p-3"
-            :class="[$page.props.locale.dir == 'ltr' ? 'right-0' : 'left-0']"
-            @click="deleteApartment"
-            v-if="$page.props.auth.user.can.includes('delete apartments')"
+            :class="[$page.props.locale.dir == 'ltr' ? 'left-0' : 'right-0']"
+            @click="isShowApartmentRecordsModalOpen = true"
+            v-if="$page.props.auth.user.can.includes('show records')"
         >
-            <FontAwesomeIcon icon="fas fa-trash" class="text-white text-lg" />
+            <FontAwesomeIcon
+                icon="fas fa-clock-rotate-left"
+                class="text-white text-2xl"
+            />
         </button>
+
+        <ShowApartmentDetailsModal
+            :apartment="apartment"
+            :open="isShowApartmentDetailsModalOpen"
+            @close="isShowApartmentDetailsModalOpen = false"
+            v-if="
+                isShowApartmentDetailsModalOpen &&
+                $page.props.auth.user.can.includes('show apartments')
+            "
+        />
 
         <ShowApartmentRecordsModal
             :apartment="apartment"
@@ -158,7 +151,10 @@ const deleteApartment = () => {
                     @close="isShowReservationsModalOpen = false"
                     v-if="
                         isShowReservationsModalOpen &&
-                        $page.props.auth.user.can.includes('show reservations')
+                        $page.props.auth.user.can.includes(
+                            'show reservations'
+                        ) &&
+                        apartment.state.toLowerCase() != 'maintenance'
                     "
                 />
 
@@ -206,7 +202,9 @@ const deleteApartment = () => {
                     :title="__('Reservations')"
                     @click="isShowReservationsModalOpen = true"
                     v-if="
-                        $page.props.auth.user.can.includes('show reservations')
+                        $page.props.auth.user.can.includes(
+                            'show reservations'
+                        ) && apartment.state.toLowerCase() != 'maintenance'
                     "
                 >
                     <FontAwesomeIcon

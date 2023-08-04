@@ -1,7 +1,8 @@
 <script setup>
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { router } from "@inertiajs/vue3";
 import ShowGuestInfo from "@/Components/Modals/ShowGuestInfo.vue";
+import EditReservationModal from "@/Components/Modals/EditReservationModal.vue";
 import PrintModal from "@/Components/Modals/PrintModal.vue";
 import Swal from "sweetalert2";
 import { __ } from "@/Composables/translations";
@@ -13,6 +14,7 @@ const props = defineProps({
 });
 
 const isShowGuestInfoModalOpen = ref(false);
+const isEditReservationModalOpen = ref(false);
 const isPrintModalOpen = ref(false);
 
 const cancelReservation = () => {
@@ -74,6 +76,18 @@ const deleteReservation = () => {
         v-if="isShowGuestInfoModalOpen && reservation.guest_name"
     />
 
+    <EditReservationModal
+        :reservation="reservation"
+        :open="isEditReservationModalOpen"
+        @close="isEditReservationModalOpen = false"
+        v-if="
+            isEditReservationModalOpen &&
+            (reservation.state.toLowerCase() == 'pending' ||
+                reservation.state.toLowerCase() == 'checkin') &&
+            $page.props.auth.user.can.includes('edit reservations')
+        "
+    />
+
     <PrintModal
         :routeUrl="route('reservations.invoice', reservation.id)"
         :windowTitle="`${__('Invoice for reservation')} ${
@@ -92,7 +106,7 @@ const deleteReservation = () => {
             scope="row"
             class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
         >
-            {{ reservation.id }}
+            {{ reservation.reservation_number }}
         </th>
         <td class="px-6 py-4 flex items-center justify-center">
             <span
@@ -117,6 +131,20 @@ const deleteReservation = () => {
         <td class="px-6 py-4 whitespace-nowrap">
             {{ reservation.total_price + " " + __("SAR") }}
         </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            <template v-if="parseFloat(reservation.discount)">
+                <span class="font-medium">
+                    {{ reservation.discount + "%" }}
+                </span>
+                <span class="text-xs">
+                    ({{ reservation.discount_amount + " " + __("SAR") }})
+                </span>
+            </template>
+            <span v-else>-</span>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            {{ reservation.amounts_due + " " + __("SAR") }}
+        </td>
         <td class="px-6 py-4 text-right whitespace-nowrap">
             <button
                 type="button"
@@ -130,11 +158,26 @@ const deleteReservation = () => {
             <span v-else>-</span>
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
+            {{ reservation.admin_name ?? "-" }}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
             {{ reservation.created_at }}
         </td>
         <td
             class="px-6 py-4 flex items-center justify-center gap-5 whitespace-nowrap"
         >
+            <button
+                @click="isEditReservationModalOpen = true"
+                :title="__('Edit Reservation')"
+                v-if="
+                    $page.props.auth.user.can.includes('edit reservations') &&
+                    (reservation.state.toLowerCase() == 'pending' ||
+                        reservation.state.toLowerCase() == 'checkin')
+                "
+            >
+                <FontAwesomeIcon icon="fas fa-pen-to-square" />
+            </button>
+
             <button
                 @click="cancelReservation"
                 :title="__('Cancel Reservation')"

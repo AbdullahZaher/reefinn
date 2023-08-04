@@ -35,10 +35,21 @@ class PermissionSeeder extends Seeder
             'transfer reservations',
             'cancel reservations',
             'print reservations',
+            'edit terms of the reservation lease',
             "change reservation price for night",
             'delete reservations',
 
             'show records',
+
+            'edit hotel information',
+
+            'show finance',
+
+            'show expenses',
+            'create expenses',
+            'delete expenses',
+
+            'show statistics',
         ];
 
         $_permissions = [];

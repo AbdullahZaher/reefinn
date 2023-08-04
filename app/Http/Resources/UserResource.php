@@ -18,6 +18,7 @@ class UserResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
+            'max_discount' => $this->max_discount,
             'permissions' => $this->whenLoaded('permissions')->pluck('name'),
         ];
     }

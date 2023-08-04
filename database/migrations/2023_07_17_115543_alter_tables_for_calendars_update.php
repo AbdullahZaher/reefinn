@@ -13,7 +13,7 @@ return new class extends Migration
     public function up(): void
     {
         // Missing ordering in previous migrations
-        \App\Models\Reservation::whereNull('number_of_companions')->get()->each(fn ($r) => $r->update([
+        DB::table('reservations')->whereNull('number_of_companions')->get()->each(fn ($r) => $r->update([
             'number_of_companions' => 0,
         ]));
 
@@ -37,16 +37,16 @@ return new class extends Migration
             $table->string('calendar')->default('gregorian')->after('timezone');
         });
 
-        \App\Models\Reservation::all()->each(function ($r) {
+        DB::table('reservations')->get()->each(function ($r) {
             if ($r->old_guest_birthday) {
-                $r->update([
+                DB::table('reservations')->where('id', $r->id)->update([
                     'checkin' => $r->old_checkin,
                     'checkout' => $r->old_checkout,
                     'guest_birthday' => $r->old_guest_birthday,
                 ]);
             }
             else {
-                $r->update([
+                DB::table('reservations')->where('id', $r->id)->update([
                     'checkin' => $r->old_checkin,
                     'checkout' => $r->old_checkout,
                 ]);
@@ -78,7 +78,7 @@ return new class extends Migration
             $table->renameColumn('old_guest_birthday', 'guest_birthday');
         });
 
-        \App\Models\Reservation::all()->each(fn ($r) => $r->update([
+        DB::table('reservations')->get()->each(fn ($r) => DB::table('reservations')->where('id', $r->id)->update([
             'old_checkin' => json_decode($r->getRawAttribute('checkin'))->gregorian,
             'old_checkout' => json_decode($r->getRawAttribute('checkout'))->gregorian,
             'old_guest_birthday' => json_decode($r->getRawAttribute('guest_birthday'))->gregorian,

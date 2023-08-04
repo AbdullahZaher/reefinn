@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
+use App\Models\Expense;
 use Illuminate\Database\Seeder;
 use Database\Seeders\ApartmentSeeder;
 
@@ -22,5 +24,7 @@ class DatabaseSeeder extends Seeder
             ApartmentSeeder::class,
             PermissionSeeder::class,
         ]);
+
+        Expense::factory(700)->create();
     }
 }

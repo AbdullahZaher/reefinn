@@ -56,6 +56,7 @@ const updatePassword = () => {
                 <InputLabel
                     for="current_password"
                     :value="__('Current Password')"
+                    required
                 />
 
                 <TextInput
@@ -64,7 +65,6 @@ const updatePassword = () => {
                     v-model="form.current_password"
                     type="password"
                     class="mt-1 block w-full"
-                    autocomplete="current-password"
                 />
 
                 <InputError
@@ -74,7 +74,11 @@ const updatePassword = () => {
             </div>
 
             <div>
-                <InputLabel for="password" :value="__('New Password')" />
+                <InputLabel
+                    for="password"
+                    :value="__('New Password')"
+                    required
+                />
 
                 <TextInput
                     id="password"
@@ -82,7 +86,6 @@ const updatePassword = () => {
                     v-model="form.password"
                     type="password"
                     class="mt-1 block w-full"
-                    autocomplete="new-password"
                 />
 
                 <InputError :message="form.errors.password" class="mt-2" />
@@ -92,6 +95,7 @@ const updatePassword = () => {
                 <InputLabel
                     for="password_confirmation"
                     :value="__('Confirm Password')"
+                    required
                 />
 
                 <TextInput
@@ -99,7 +103,6 @@ const updatePassword = () => {
                     v-model="form.password_confirmation"
                     type="password"
                     class="mt-1 block w-full"
-                    autocomplete="new-password"
                 />
 
                 <InputError
@@ -119,19 +122,6 @@ const updatePassword = () => {
                     <Loader v-if="form.processing" />
                     <span>{{ __("Save") }}</span>
                 </PrimaryButton>
-
-                <Transition
-                    enter-from-class="opacity-0"
-                    leave-to-class="opacity-0"
-                    class="transition ease-in-out"
-                >
-                    <p
-                        v-if="form.recentlySuccessful"
-                        class="text-sm text-gray-600"
-                    >
-                        {{ __("Saved.") }}
-                    </p>
-                </Transition>
             </div>
         </form>
     </section>

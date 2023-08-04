@@ -2,6 +2,8 @@
 
 namespace App\Enums;
 
+use Illuminate\Support\Str;
+
 enum ApartmentStateColorEnum: string
 {
     case Empty = 'green';
@@ -13,5 +15,15 @@ enum ApartmentStateColorEnum: string
     public static function fromName(string $name)
     {
         return constant("self::$name");
+    }
+
+        public static function toArrayAsc(): array
+    {
+        $values = [];
+        foreach (self::cases() as $case) {
+            $values[Str::lower($case->name)] = $case->value;
+        }
+
+        return $values;
     }
 }

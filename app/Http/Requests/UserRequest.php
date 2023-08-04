@@ -28,6 +28,7 @@ class UserRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => $this->isMethod('patch') ? ['required', 'email', 'max:255', Rule::unique(User::class)->ignore($this->user->id)] : ['required', 'email', 'max:255', Rule::unique(User::class)],
             'password' => $this->isMethod('patch') ? ['nullable', Password::defaults(), 'confirmed'] : ['required', Password::defaults(), 'confirmed'],
+            'max_discount' => ['required', 'numeric', 'min:0', 'max:100.00',],
             'permissions' => ['nullable', 'array'],
             'permissions.*' => ['string', 'max:50'],
         ];

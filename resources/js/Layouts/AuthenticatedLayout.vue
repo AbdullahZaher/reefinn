@@ -20,7 +20,7 @@ const showingNavigationDropdown = ref(false);
         <div class="min-h-screen bg-gray-100">
             <nav class="bg-white border-b border-gray-100">
                 <!-- Primary Navigation Menu -->
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="max-w-7xl mx-auto px-4 lg:px-6 lg:px-8">
                     <div class="flex justify-between h-16">
                         <div class="flex">
                             <!-- Logo -->
@@ -34,11 +34,11 @@ const showingNavigationDropdown = ref(false);
 
                             <!-- Navigation Links -->
                             <div
-                                class="hidden space-x-8 rtl:space-x-reverse sm:-my-px sm:flex"
+                                class="hidden space-x-8 rtl:space-x-reverse lg:-my-px lg:flex"
                                 :class="[
                                     $page.props.locale.dir == 'ltr'
-                                        ? 'sm:ml-10'
-                                        : 'sm:mr-10',
+                                        ? 'lg:ml-10'
+                                        : 'lg:mr-10',
                                 ]"
                             >
                                 <NavLink
@@ -82,6 +82,32 @@ const showingNavigationDropdown = ref(false);
                                 </NavLink>
 
                                 <NavLink
+                                    :href="route('finance.index')"
+                                    :active="route().current('finance.index')"
+                                    v-if="
+                                        $page.props.auth.user.can.includes(
+                                            'show finance'
+                                        )
+                                    "
+                                >
+                                    {{ __("Finance and Tax") }}
+                                </NavLink>
+
+                                <NavLink
+                                    :href="route('statistics.index')"
+                                    :active="
+                                        route().current('statistics.index')
+                                    "
+                                    v-if="
+                                        $page.props.auth.user.can.includes(
+                                            'show statistics'
+                                        )
+                                    "
+                                >
+                                    {{ __("Statistics") }}
+                                </NavLink>
+
+                                <NavLink
                                     :href="route('users.index')"
                                     :active="route().current('users.index')"
                                     v-if="
@@ -98,11 +124,11 @@ const showingNavigationDropdown = ref(false);
                         <div class="flex items-center space-x-4">
                             <LanguageSwitcher />
                             <div
-                                class="hidden sm:flex sm:items-center"
+                                class="hidden lg:flex lg:items-center"
                                 :class="[
                                     $page.props.locale.dir == 'ltr'
-                                        ? 'sm:ml-6'
-                                        : 'sm:mr-6',
+                                        ? 'lg:ml-6'
+                                        : 'lg:mr-6',
                                 ]"
                             >
                                 <!-- Settings Dropdown -->
@@ -169,7 +195,7 @@ const showingNavigationDropdown = ref(false);
 
                         <!-- Hamburger -->
                         <div
-                            class="flex items-center sm:hidden"
+                            class="flex items-center lg:hidden"
                             :class="[
                                 $page.props.locale.dir == 'ltr'
                                     ? '-mr-2'
@@ -223,7 +249,7 @@ const showingNavigationDropdown = ref(false);
                         block: showingNavigationDropdown,
                         hidden: !showingNavigationDropdown,
                     }"
-                    class="sm:hidden"
+                    class="lg:hidden"
                 >
                     <div class="pt-2 pb-3 space-y-1">
                         <ResponsiveNavLink
@@ -260,6 +286,30 @@ const showingNavigationDropdown = ref(false);
                             "
                         >
                             {{ __("Apartments") }}
+                        </ResponsiveNavLink>
+
+                        <ResponsiveNavLink
+                            :href="route('finance.index')"
+                            :active="route().current('finance.index')"
+                            v-if="
+                                $page.props.auth.user.can.includes(
+                                    'show finance'
+                                )
+                            "
+                        >
+                            {{ __("Finance and Tax") }}
+                        </ResponsiveNavLink>
+
+                        <ResponsiveNavLink
+                            :href="route('statistics.index')"
+                            :active="route().current('statistics.index')"
+                            v-if="
+                                $page.props.auth.user.can.includes(
+                                    'show statistics'
+                                )
+                            "
+                        >
+                            {{ __("Statistics") }}
                         </ResponsiveNavLink>
 
                         <ResponsiveNavLink

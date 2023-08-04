@@ -21,8 +21,9 @@ class RecordResource extends JsonResource
         return [
             'state_from' => __(ApartmentStateEnum::tryFrom($this->state_from)->name),
             'state_to' => __(ApartmentStateEnum::tryFrom($this->state_to)->name),
-            'reservation' => $this->whenLoaded('reservation', new ReservationResource($this->reservation)),
+            'reservation' =>  ReservationResource::make($this->whenLoaded('reservation')),
             'note' => $this->note ?? '-',
+            'admin_name' => $this->whenLoaded('user', $this->user->name),
             'created_at' => $this->created_at,
         ];
     }

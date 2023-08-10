@@ -55,12 +55,10 @@ watch(() => props.toast, show, { deep: true });
         leave-to-class="translate-y-96 lg:translate-y-0 lg:translate-x-96"
     >
         <div
-            class="fixed bottom-0 lg:bottom-auto lg:top-0 lg:right-0 z-50 mt-4 flex w-full lg:max-w-xs overflow-x-hidden overflow-y-auto lg:rounded max-h-96 text-white shadow"
+            class="fixed bottom-0 lg:bottom-auto lg:top-0 lg:right-0 z-50 mt-4 flex w-full lg:max-w-xs overflow-x-hidden overflow-y-auto lg:rounded max-h-96 text-white shadow rtl:lg:mr-4 ltr:lg:ml-4"
             :class="{
                 'bg-green-600': toast.type == 'success',
                 'bg-red-600': toast.type == 'error',
-                'mr-4': $page.props.locale.dir,
-                'ml-4': !$page.props.locale.dir,
             }"
             v-if="visible && toast"
         >

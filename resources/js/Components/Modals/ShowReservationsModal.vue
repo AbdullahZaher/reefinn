@@ -12,6 +12,12 @@ const props = defineProps({
     apartment: {
         type: Object,
     },
+    idTypes: {
+        type: Object,
+    },
+    paymentMethods: {
+        type: Object,
+    },
 });
 
 const emit = defineEmits(["close"]);
@@ -35,6 +41,8 @@ watch(
     >
         <AddReservationModal
             :apartment="apartment"
+            :idTypes="idTypes"
+            :paymentMethods="paymentMethods"
             :open="isAddReservationModalOpen"
             @close="isAddReservationModalOpen = false"
             @closeParent="$emit('close')"
@@ -65,6 +73,8 @@ watch(
                 <Reservation
                     :apartment="apartment"
                     :reservation="reservation"
+                    :idTypes="idTypes"
+                    :paymentMethods="paymentMethods"
                     @close="$emit('close')"
                     v-model:clickOutsideToClose="clickOutsideToClose"
                 />

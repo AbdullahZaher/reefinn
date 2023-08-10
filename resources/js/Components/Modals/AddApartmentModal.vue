@@ -8,12 +8,19 @@ const props = defineProps({
     open: {
         type: Boolean,
     },
+    apartmentTypes: {
+        type: Object,
+    },
+    apartmentDescriptions: {
+        type: Object,
+    },
 });
 
 const emit = defineEmits(["close"]);
 
 const _form = useForm({
     name: "",
+    type: "",
     description: "",
     price_for_night: "",
 });
@@ -26,6 +33,7 @@ const _submitHandler = () => {
             _form.reset();
             emit("close");
         },
+        preserveScroll: true,
     });
 };
 </script>
@@ -35,6 +43,7 @@ const _submitHandler = () => {
         :headerTitle="__('Add Apartment')"
         :open="open"
         @close="$emit('close')"
+        :clickOutsideToClose="!_form.processing"
     >
         <form class="flex flex-wrap items-center gap-4">
             <div class="mb-6 w-full">
@@ -56,16 +65,53 @@ const _submitHandler = () => {
 
             <div class="mb-6 w-full">
                 <label
+                    for="type"
+                    class="block mb-2 text-sm font-medium text-gray-900"
+                >
+                    {{ __("Room Type") }}
+                    <span class="text-red-600 text-sm">*</span>
+                </label>
+                <select
+                    id="type"
+                    class="border border-gray-300 text-gray-900 bg-gray-50 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 mt-1 rtl"
+                    v-model="_form.type"
+                >
+                    <option disabled>{{ __("Choose a option") }}</option>
+                    <option
+                        :value="type.id"
+                        v-for="(type, index) in apartmentTypes"
+                        :key="index"
+                    >
+                        {{ __(type.value) }}
+                    </option>
+                </select>
+                <p class="text-sm text-red-600 mt-1">
+                    {{ _form.errors.type }}
+                </p>
+            </div>
+
+            <div class="mb-6 w-full">
+                <label
                     for="description"
                     class="block mb-2 text-sm font-medium text-gray-900"
                 >
-                    {{ __("Description") }}
+                    {{ __("Room Description") }}
+                    <span class="text-red-600 text-sm">*</span>
                 </label>
-                <textarea
+                <select
                     id="description"
+                    class="border border-gray-300 text-gray-900 bg-gray-50 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 mt-1 rtl"
                     v-model="_form.description"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                ></textarea>
+                >
+                    <option disabled>{{ __("Choose a option") }}</option>
+                    <option
+                        :value="description.id"
+                        v-for="(description, index) in apartmentDescriptions"
+                        :key="index"
+                    >
+                        {{ __(description.value) }}
+                    </option>
+                </select>
                 <p class="text-sm text-red-600 mt-1">
                     {{ _form.errors.description }}
                 </p>
@@ -93,12 +139,7 @@ const _submitHandler = () => {
                 </p>
             </div>
 
-            <div
-                class="flex items-center justify-end"
-                :class="[
-                    $page.props.locale.dir == 'ltr' ? 'ml-auto' : 'mr-auto',
-                ]"
-            >
+            <div class="flex items-center justify-end ltr:ml-auto rtl:mr-auto">
                 <button
                     type="submit"
                     class="text-white bg-blue-700 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 flex items-center justify-center space-x-2 rtl:space-x-reverse"

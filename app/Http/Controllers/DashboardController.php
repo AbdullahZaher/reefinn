@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Inertia\Inertia;
 use App\Models\Apartment;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Resources\ApartmentResource;
 
@@ -42,8 +43,33 @@ class DashboardController extends Controller
             ->orderBy('name')
             ->get();
 
+            $apartmentTypes = collect(config('custom.apartments.types'))->map(fn ($key, $value) => [
+                'id' => $value,
+                'value' => $key,
+            ]);
+
+            $apartmentDescriptions = collect(config('custom.apartments.descriptions'))->map(fn ($key, $value) => [
+                'id' => $value,
+                'value' => $key,
+            ]);
+
+            $idTypes = collect(config('custom.reservations.id_types'))->map(fn ($key, $value) => [
+                'id' => $value,
+                'value' => $key,
+            ]);
+
+            $paymentMethods = collect(config('custom.reservations.payment_methods'))->map(fn ($key, $value) => [
+                'id' => $value,
+                'value' => $key,
+                'image_url' => asset('imgs/' . Str::slug($key) . '.png'),
+            ]);
+
         return Inertia::render('Dashboard', [
             'apartments' => ApartmentResource::collection($apartments),
+            'apartmentTypes' => $apartmentTypes,
+            'apartmentDescriptions' => $apartmentDescriptions,
+            'idTypes' => $idTypes,
+            'paymentMethods' => $paymentMethods,
         ]);
     }
 }

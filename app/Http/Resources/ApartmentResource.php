@@ -24,7 +24,10 @@ class ApartmentResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'description' => $this->description,
+            'type' => config('custom.apartments.types.' . $this->type),
+            'description' => config('custom.apartments.descriptions.' . $this->description),
+            'type_id' => $this->type,
+            'description_id' => $this->description,
             'price_for_night' => number_format($this->price_for_night, 2),
             'state' => $state_name,
             'state_color' => ApartmentStateColorEnum::fromName($state_name),

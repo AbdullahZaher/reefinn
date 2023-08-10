@@ -26,8 +26,12 @@ const emit = defineEmits(["close"]);
                 {{ apartment.id }}
             </div>
             <div class="py-5 border px-6">
+                <span class="font-bold">{{ __("Type") }}:</span>
+                {{ __(apartment.type) ?? "-" }}
+            </div>
+            <div class="py-5 border px-6">
                 <span class="font-bold">{{ __("Description") }}:</span>
-                {{ apartment.description ?? "-" }}
+                {{ __(apartment.description) ?? "-" }}
             </div>
             <div class="py-5 border px-6">
                 <span class="font-bold"

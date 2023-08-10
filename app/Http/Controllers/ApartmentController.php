@@ -30,10 +30,22 @@ class ApartmentController extends Controller
         if ($request->wantsJson())
             return ApartmentResource::collection($apartments);
 
+        $apartmentTypes = collect(config('custom.apartments.types'))->map(fn ($key, $value) => [
+            'id' => $value,
+            'value' => $key,
+        ]);
+
+        $apartmentDescriptions = collect(config('custom.apartments.descriptions'))->map(fn ($key, $value) => [
+            'id' => $value,
+            'value' => $key,
+        ]);
+
         return Inertia::render('Apartments', [
             'filters' => $filters,
             'apartments' => ApartmentResource::collection($apartments),
             'states' => $states,
+            'apartmentTypes' => $apartmentTypes,
+            'apartmentDescriptions' => $apartmentDescriptions,
         ]);
     }
 
@@ -93,10 +105,15 @@ class ApartmentController extends Controller
         } else if ($apartment->state === ApartmentStateEnum::Inhabited->value) {
             abort_if(!$request->user()->can('checkout apartments'), 403);
 
-            DB::transaction(function () use ($apartment) {
+            $validated = $request->validate([
+                'rating' => ['nullable', 'integer', 'min:1', 'max:5'],
+            ]);
+
+            DB::transaction(function () use ($apartment, $validated) {
                 $apartment->currentReservation->update([
                     'state' => ReservationStateEnum::Checkout->value,
                     'real_checkout' => now(),
+                    'rating' => $validated['rating'],
                 ]);
 
                 $apartment->update([

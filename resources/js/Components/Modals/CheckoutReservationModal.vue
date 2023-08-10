@@ -16,7 +16,7 @@ const props = defineProps({
 const emit = defineEmits(["close"]);
 
 const _form = useForm({
-    note: "",
+    rating: "",
 });
 
 const _submitHandler = () => {
@@ -32,7 +32,7 @@ const _submitHandler = () => {
 
 <template>
     <Modal
-        :headerTitle="__('Cleaning Note')"
+        :headerTitle="__('Checkout Reservation For') + ' ' + apartment.name"
         :open="open"
         @close="$emit('close')"
         :clickOutsideToClose="!_form.processing"
@@ -40,17 +40,30 @@ const _submitHandler = () => {
         <form class="flex flex-wrap items-center gap-4">
             <div class="mb-6 w-full">
                 <label
-                    for="note"
+                    for="rating"
                     class="block mb-2 text-sm font-medium text-gray-900"
                 >
-                    {{ __("Note") }}
+                    {{ __("Guest Rating") }}
                 </label>
-                <textarea
-                    id="note"
-                    v-model="_form.note"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                    required
-                ></textarea>
+                <div class="flex items-center justify-center gap-1 mt-2">
+                    <button
+                        type="button"
+                        v-for="(i, j) in Array.from({ length: 5 })"
+                        :key="j"
+                        @click="_form.rating = j + 1"
+                    >
+                        <FontAwesomeIcon
+                            icon="fas fa-star"
+                            class="text-yellow-400 text-3xl"
+                            v-if="_form.rating >= j + 1"
+                        />
+                        <FontAwesomeIcon
+                            icon="far fa-star"
+                            class="text-yellow-400 text-3xl"
+                            v-else
+                        />
+                    </button>
+                </div>
                 <p class="text-sm text-red-600 mt-1">{{ _form.errors.note }}</p>
             </div>
 
@@ -67,7 +80,7 @@ const _submitHandler = () => {
                     :disabled="_form.processing"
                 >
                     <Loader v-if="_form.processing" />
-                    <span>{{ __("Update") }}</span>
+                    <span>{{ __("Check-out") }}</span>
                 </button>
             </div>
         </form>

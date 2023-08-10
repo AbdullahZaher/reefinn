@@ -9,6 +9,12 @@ const props = defineProps({
     apartment: {
         type: Object,
     },
+    apartmentTypes: {
+        type: Object,
+    },
+    apartmentDescriptions: {
+        type: Object,
+    },
 });
 
 const isEditApartmentModalOpen = ref(false);
@@ -64,6 +70,8 @@ const deleteApartment = () => {
 
 <template>
     <EditApartmentModal
+        :apartmentTypes="apartmentTypes"
+        :apartmentDescriptions="apartmentDescriptions"
         :open="isEditApartmentModalOpen"
         @close="isEditApartmentModalOpen = false"
         :apartment="apartment"
@@ -92,7 +100,10 @@ const deleteApartment = () => {
             {{ apartment.name }}
         </td>
         <td class="px-6 py-4 max-w-xs break-words">
-            {{ apartment.description ?? "-" }}
+            {{ __(apartment.type) }}
+        </td>
+        <td class="px-6 py-4 max-w-xs break-words">
+            {{ __(apartment.description) }}
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
             {{ apartment.price_for_night + " " + __("SAR") }}

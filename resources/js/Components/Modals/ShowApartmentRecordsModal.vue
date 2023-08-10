@@ -67,6 +67,10 @@ const emit = defineEmits(["close"]);
                                     {{ record.reservation.guest_name }}
                                 </p>
                                 <p class="whitespace-nowrap">
+                                    {{ __("ID Type") }}:
+                                    {{ __(record.reservation.id_type) }}
+                                </p>
+                                <p class="whitespace-nowrap">
                                     {{ __("Guest ID") }}:
                                     {{ record.reservation.guest_id }}
                                 </p>
@@ -142,6 +146,42 @@ const emit = defineEmits(["close"]);
                                         __("SAR")
                                     }}
                                 </p>
+                                <p class="whitespace-nowrap">
+                                    {{ __("Payment Method") }}:
+                                    {{ __(record.reservation.payment_method) }}
+                                </p>
+                                <div
+                                    class="whitespace-nowrap flex items-center gap-1"
+                                    v-if="
+                                        record.reservation.rating &&
+                                        record.state_from.toLowerCase() ==
+                                            __('Inhabited').toLowerCase()
+                                    "
+                                >
+                                    {{ __("Guest Rating") }}:
+                                    <div class="flex items-center">
+                                        <template
+                                            v-for="(i, j) in Array.from({
+                                                length: 5,
+                                            })"
+                                            :key="i"
+                                        >
+                                            <FontAwesomeIcon
+                                                icon="fas fa-star"
+                                                class="text-yellow-400"
+                                                v-if="
+                                                    record.reservation.rating >=
+                                                    j + 1
+                                                "
+                                            />
+                                            <FontAwesomeIcon
+                                                icon="far fa-star"
+                                                class="text-yellow-400"
+                                                v-else
+                                            />
+                                        </template>
+                                    </div>
+                                </div>
                             </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">

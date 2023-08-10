@@ -53,8 +53,8 @@ const isCreateUserModalOpen = ref(false);
         />
 
         <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-4 py-12">
+            <div class="max-w-[100rem] mx-auto sm:px-6 lg:px-8">
+                <div class="px-4 sm:px-6 lg:px-4 py-12">
                     <div
                         class="text-center pb-12 flex items-center justify-between flex-col lg:flex-row space-y-6 lg:space-y-0"
                     >

@@ -5,6 +5,7 @@ import ShowApartmentDetailsModal from "@/Components/Modals/ShowApartmentDetailsM
 import ShowApartmentRecordsModal from "@/Components/Modals/ShowApartmentRecordsModal.vue";
 import ShowReservationsModal from "@/Components/Modals/ShowReservationsModal.vue";
 import EditReservationModal from "@/Components/Modals/EditReservationModal.vue";
+import CheckoutReservationModal from "@/Components/Modals/CheckoutReservationModal.vue";
 import SubmitCleaningModal from "@/Components/Modals/SumbitCleaningModal.vue";
 import PrintModal from "@/Components/Modals/PrintModal.vue";
 import Swal from "sweetalert2";
@@ -14,6 +15,12 @@ const props = defineProps({
     apartment: {
         type: Object,
     },
+    idTypes: {
+        type: Object,
+    },
+    paymentMethods: {
+        type: Object,
+    },
 });
 
 const isShowApartmentDetailsModalOpen = ref(false);
@@ -21,33 +28,8 @@ const isShowApartmentRecordsModalOpen = ref(false);
 const isShowReservationsModalOpen = ref(false);
 const isEditReservationModalOpen = ref(false);
 const isPrintModalOpen = ref(false);
+const isCheckoutReservationModalOpen = ref(false);
 const isSubmitCleaningModalOpen = ref(false);
-
-const changeState = () => {
-    Swal.fire({
-        title: __("Are you sure?"),
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        cancelButtonText: __("Cancel"),
-        confirmButtonText: __("Yes, update it!"),
-        showLoaderOnConfirm: true,
-        allowOutsideClick: () => !Swal.isLoading(),
-        backdrop: true,
-        preConfirm: () =>
-            new Promise((resolve) => {
-                router.patch(
-                    route("apartments.update.state", props.apartment.id),
-                    {},
-                    {
-                        preserveScroll: true,
-                        onFinish: resolve,
-                    }
-                );
-            }),
-    });
-};
 
 const updateMaintenance = () => {
     Swal.fire({
@@ -78,11 +60,12 @@ const updateMaintenance = () => {
 
 <template>
     <div
-        class="w-full rounded-lg p-12 flex flex-col justify-center items-center relative"
+        class="w-full rounded-lg py-10 box-border flex flex-col justify-center items-center relative"
         :class="`bg-${apartment.state_color}-400`"
     >
         <button
             type="click"
+            :title="__('Show Apartment Details')"
             class="absolute top-0 p-3"
             :class="[$page.props.locale.dir == 'ltr' ? 'right-0' : 'left-0']"
             @click="isShowApartmentDetailsModalOpen = true"
@@ -90,12 +73,13 @@ const updateMaintenance = () => {
         >
             <FontAwesomeIcon
                 icon="fas fa-circle-info"
-                class="text-white text-2xl"
+                class="text-white text-[1.4rem] leading-8"
             />
         </button>
 
         <button
             type="click"
+            :title="__('Show Records')"
             class="absolute top-0 p-3"
             :class="[$page.props.locale.dir == 'ltr' ? 'left-0' : 'right-0']"
             @click="isShowApartmentRecordsModalOpen = true"
@@ -103,7 +87,7 @@ const updateMaintenance = () => {
         >
             <FontAwesomeIcon
                 icon="fas fa-clock-rotate-left"
-                class="text-white text-2xl"
+                class="text-white text-[1.4rem] leading-8"
             />
         </button>
 
@@ -129,13 +113,13 @@ const updateMaintenance = () => {
 
         <div class="text-center space-y-6">
             <div class="space-y-2 select-none">
-                <h3 class="text-6xl text-white font-bold break-all">
+                <h3 class="text-5xl text-white font-bold break-all">
                     {{ apartment.name }}
                 </h3>
-                <p class="text-xl text-slate-100 font-normal">
+                <p class="text-lg text-slate-100 font-normal">
                     {{ __(apartment.state) }}
                     <span
-                        class="text-base block text-slate-200"
+                        class="text-sm block text-slate-200"
                         v-if="apartment.state.toLowerCase() == 'inhabited'"
                     >
                         {{ `(${apartment.days_left} ${__("days left")})` }}
@@ -147,6 +131,8 @@ const updateMaintenance = () => {
             >
                 <ShowReservationsModal
                     :apartment="apartment"
+                    :idTypes="idTypes"
+                    :paymentMethods="paymentMethods"
                     :open="isShowReservationsModalOpen"
                     @close="isShowReservationsModalOpen = false"
                     v-if="
@@ -161,6 +147,8 @@ const updateMaintenance = () => {
                 <EditReservationModal
                     :apartment="apartment"
                     :reservation="apartment.current_reservation"
+                    :idTypes="idTypes"
+                    :paymentMethods="paymentMethods"
                     :open="isEditReservationModalOpen"
                     @close="isEditReservationModalOpen = false"
                     v-if="
@@ -187,13 +175,29 @@ const updateMaintenance = () => {
                     "
                 />
 
+                <CheckoutReservationModal
+                    :apartment="apartment"
+                    :open="isCheckoutReservationModalOpen"
+                    @close="isCheckoutReservationModalOpen = false"
+                    v-if="
+                        isCheckoutReservationModalOpen &&
+                        $page.props.auth.user.can.includes(
+                            'checkout apartments'
+                        ) &&
+                        apartment.state.toLowerCase() == 'inhabited'
+                    "
+                />
+
                 <SubmitCleaningModal
                     :apartment="apartment"
                     :open="isSubmitCleaningModalOpen"
                     @close="isSubmitCleaningModalOpen = false"
                     v-if="
                         isSubmitCleaningModalOpen &&
-                        $page.props.auth.user.can.includes('empty apartments')
+                        $page.props.auth.user.can.includes(
+                            'empty apartments'
+                        ) &&
+                        apartment.state.toLowerCase() == 'cleaning'
                     "
                 />
 
@@ -209,7 +213,7 @@ const updateMaintenance = () => {
                 >
                     <FontAwesomeIcon
                         icon="fas fa-calendar"
-                        class="text-white text-2xl"
+                        class="text-white text-[1.4rem] leading-8"
                     />
                 </button>
 
@@ -226,13 +230,13 @@ const updateMaintenance = () => {
                     >
                         <FontAwesomeIcon
                             icon="fas fa-pen-to-square"
-                            class="text-white text-2xl"
+                            class="text-white text-[1.4rem] leading-8"
                         />
                     </button>
                     <button
                         type="button"
                         :title="__('Check-out')"
-                        @click="changeState"
+                        @click="isCheckoutReservationModalOpen = true"
                         v-if="
                             $page.props.auth.user.can.includes(
                                 'checkout apartments'
@@ -241,7 +245,7 @@ const updateMaintenance = () => {
                     >
                         <FontAwesomeIcon
                             icon="fas fa-person-walking-arrow-right"
-                            class="text-white text-2xl"
+                            class="text-white text-[1.4rem] leading-8"
                         />
                     </button>
 
@@ -257,7 +261,7 @@ const updateMaintenance = () => {
                     >
                         <FontAwesomeIcon
                             icon="fas fa-print"
-                            class="text-white text-2xl"
+                            class="text-white text-[1.4rem] leading-8"
                         />
                     </button>
                 </template>
@@ -277,7 +281,7 @@ const updateMaintenance = () => {
                     >
                         <FontAwesomeIcon
                             icon="fas fa-clipboard-check"
-                            class="text-white text-2xl"
+                            class="text-white text-[1.4rem] leading-8"
                         />
                     </button>
                 </template>
@@ -296,7 +300,7 @@ const updateMaintenance = () => {
                     >
                         <FontAwesomeIcon
                             icon="fas fa-unlock"
-                            class="text-white text-2xl"
+                            class="text-white text-[1.4rem] leading-8"
                         />
                     </button>
                 </template>

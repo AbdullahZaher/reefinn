@@ -14,6 +14,9 @@ defineProps({
     calendars: {
         type: Array,
     },
+    viewModes: {
+        type: Array,
+    },
 });
 
 const user = usePage().props.auth.user;
@@ -23,6 +26,7 @@ const form = useForm({
     email: user.email,
     timezone: user.timezone,
     calendar: user.calendar,
+    view_mode: user.view_mode,
 });
 </script>
 
@@ -103,8 +107,7 @@ const form = useForm({
 
                 <select
                     id="calendar"
-                    class="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 mt-1"
-                    style="direction: ltr"
+                    class="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 mt-1 rtl"
                     v-model="form.calendar"
                 >
                     <option disabled>{{ __("Choose a option") }}</option>
@@ -118,6 +121,27 @@ const form = useForm({
                 </select>
 
                 <InputError class="mt-2" :message="form.errors.calendar" />
+            </div>
+
+            <div>
+                <InputLabel for="view_mode" :value="__('View Mode')" required />
+
+                <select
+                    id="viewMode"
+                    class="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 mt-1 rtl"
+                    v-model="form.view_mode"
+                >
+                    <option disabled>{{ __("Choose a option") }}</option>
+                    <option
+                        :value="viewMode.value"
+                        v-for="(viewMode, index) in viewModes"
+                        :key="index"
+                    >
+                        {{ viewMode.label }}
+                    </option>
+                </select>
+
+                <InputError class="mt-2" :message="form.errors.viewMode" />
             </div>
 
             <div class="flex items-center gap-4">

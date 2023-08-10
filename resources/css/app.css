@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+[dir="rtl"] select.rtl {
+    background-position: left 0.5rem center;
+}

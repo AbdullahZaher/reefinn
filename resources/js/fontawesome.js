@@ -29,7 +29,12 @@ import {
     faUsers,
     faMoneyBills,
     faMoneyBillTransfer,
+    faList,
+    faTableCellsLarge,
+    faStar,
 } from "@fortawesome/free-solid-svg-icons";
+
+import { faStar as faStarR } from "@fortawesome/free-regular-svg-icons";
 
 export default function initFontawesome() {
     library.add(
@@ -55,7 +60,11 @@ export default function initFontawesome() {
         faBuilding,
         faUsers,
         faMoneyBills,
-        faMoneyBillTransfer
+        faMoneyBillTransfer,
+        faList,
+        faTableCellsLarge,
+        faStar,
+        faStarR
     );
 
     return FontAwesomeIcon;

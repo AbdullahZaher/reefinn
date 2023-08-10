@@ -20,6 +20,12 @@ const props = defineProps({
     states: {
         type: Array,
     },
+    apartmentTypes: {
+        type: Object,
+    },
+    apartmentDescriptions: {
+        type: Object,
+    },
 });
 
 const apartments = ref(props.apartments);
@@ -73,8 +79,8 @@ watch(
         </template>
 
         <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-4 py-12">
+            <div class="max-w-[100rem] mx-auto sm:px-6 lg:px-8">
+                <div class="px-4 sm:px-6 lg:px-4 py-12">
                     <div
                         class="text-center pb-12 flex items-center justify-between flex-col lg:flex-row space-y-6 lg:space-y-0"
                     >
@@ -118,6 +124,9 @@ watch(
                                             {{ __("Name") }}
                                         </th>
                                         <th scope="col" class="px-6 py-3">
+                                            {{ __("Type") }}
+                                        </th>
+                                        <th scope="col" class="px-6 py-3">
                                             {{ __("Description") }}
                                         </th>
                                         <th scope="col" class="px-6 py-3">
@@ -136,6 +145,10 @@ watch(
                                         v-for="apartment in apartments.data"
                                         :key="apartment.id"
                                         :apartment="apartment"
+                                        :apartmentTypes="apartmentTypes"
+                                        :apartmentDescriptions="
+                                            apartmentDescriptions
+                                        "
                                     />
                                 </tbody>
                             </table>

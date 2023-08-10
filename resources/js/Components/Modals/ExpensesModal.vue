@@ -71,7 +71,7 @@ const deleteExpense = (id) => {
         :headerTitle="__('Expenses')"
         :open="open"
         @close="$emit('close')"
-        :clickOutsideToClose="clickOutsideToClose"
+        :clickOutsideToClose="clickOutsideToClose && !_form.processing"
     >
         <form
             class="flex flex-wrap items-center gap-4"

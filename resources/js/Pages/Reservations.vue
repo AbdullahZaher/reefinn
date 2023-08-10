@@ -20,6 +20,12 @@ const props = defineProps({
     states: {
         type: Array,
     },
+    idTypes: {
+        type: Object,
+    },
+    paymentMethods: {
+        type: Object,
+    },
 });
 
 const reservations = ref(props.reservations);
@@ -73,8 +79,8 @@ watch(
         </template>
 
         <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-4 py-12">
+            <div class="max-w-[100rem] mx-auto sm:px-6 lg:px-8">
+                <div class="px-4 sm:px-6 lg:px-4 py-12">
                     <div
                         class="text-center pb-12 flex items-center justify-between flex-col lg:flex-row space-y-6 lg:space-y-0"
                     >
@@ -137,6 +143,9 @@ watch(
                                             {{ __("Amounts Due") }}
                                         </th>
                                         <th scope="col" class="px-6 py-3">
+                                            {{ __("Payment Method") }}
+                                        </th>
+                                        <th scope="col" class="px-6 py-3">
                                             {{ __("Guest") }}
                                         </th>
                                         <th scope="col" class="px-6 py-3">
@@ -158,6 +167,8 @@ watch(
                                         v-for="reservation in reservations.data"
                                         :key="reservation.id"
                                         :reservation="reservation"
+                                        :idTypes="idTypes"
+                                        :paymentMethods="paymentMethods"
                                     />
                                 </tbody>
                             </table>

@@ -29,6 +29,8 @@ class HotelRequest extends FormRequest
             'commercial_register' => ['required', 'string', 'max:255'],
             'tax_number' => ['required', 'string', 'max:255'],
             'checkout_default_time' => ['required', 'date_format:H:i'],
+            'auto_renew_after' => ['required', 'integer', 'min:1', 'max:23'],
+            'timezone' => ['required', 'timezone', 'max:255'],
         ];
     }
 }

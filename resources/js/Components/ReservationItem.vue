@@ -11,6 +11,12 @@ const props = defineProps({
     reservation: {
         type: Object,
     },
+    idTypes: {
+        type: Object,
+    },
+    paymentMethods: {
+        type: Object,
+    },
 });
 
 const isShowGuestInfoModalOpen = ref(false);
@@ -77,7 +83,10 @@ const deleteReservation = () => {
     />
 
     <EditReservationModal
+        :apartment="reservation.apartment"
         :reservation="reservation"
+        :idTypes="idTypes"
+        :paymentMethods="paymentMethods"
         :open="isEditReservationModalOpen"
         @close="isEditReservationModalOpen = false"
         v-if="
@@ -144,6 +153,9 @@ const deleteReservation = () => {
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
             {{ reservation.amounts_due + " " + __("SAR") }}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            {{ __(reservation.payment_method) }}
         </td>
         <td class="px-6 py-4 text-right whitespace-nowrap">
             <button

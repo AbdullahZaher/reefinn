@@ -27,6 +27,8 @@ class ProfileController extends Controller
             'commercial_register' => $settings->commercial_register,
             'tax_number' => $settings->tax_number,
             'checkout_default_time' => $settings->checkout_default_time,
+            'auto_renew_after' => $settings->auto_renew_after,
+            'timezone' => $settings->timezone,
         ];
 
         $calendars = [
@@ -40,10 +42,22 @@ class ProfileController extends Controller
             ]
         ];
 
+        $viewModes = [
+            [
+                'value' => 'grid',
+                'label' => __('Grid'),
+            ],
+            [
+                'value' => 'list',
+                'label' => __('List'),
+            ]
+        ];
+
         return Inertia::render('Profile/Edit', [
             'hotel' => $hotel,
             'timezones' => DateTimeZone::listIdentifiers(DateTimeZone::ALL),
             'calendars' => $calendars,
+            'viewModes' => $viewModes,
             'terms' => $settings->reservation_lease_terms,
         ]);
     }

@@ -46,7 +46,7 @@ class Reservation extends Model
     protected function guestBirthday(): Attribute
     {
         return Attribute::make(
-            get: fn (string $value) => json_decode($value)->{auth()->user()->calendar},
+            get: fn (string $value) => json_decode($value)->{auth()->user()?->calendar ?? 'gregorian'},
             set: fn (string $value) => json_encode(['gregorian' => $value, 'hijri' => Hijri::Date('Y-m-d', Carbon::parse($value)),]),
         );
     }
@@ -54,7 +54,7 @@ class Reservation extends Model
     protected function checkin(): Attribute
     {
         return Attribute::make(
-            get: fn (string $value) => json_decode($value)->{auth()->user()->calendar},
+            get: fn (string $value) => json_decode($value)->{auth()->user()?->calendar ?? 'gregorian'},
             set: fn (string $value) => json_encode(['gregorian' => $value, 'hijri' => Hijri::Date('Y-m-d', Carbon::parse($value)),]),
         );
     }
@@ -62,7 +62,7 @@ class Reservation extends Model
     protected function checkout(): Attribute
     {
         return Attribute::make(
-            get: fn (string $value) => json_decode($value)->{auth()->user()->calendar},
+            get: fn (string $value) => json_decode($value)->{auth()->user()?->calendar ?? 'gregorian'},
             set: fn (string $value) => json_encode(['gregorian' => $value, 'hijri' => Hijri::Date('Y-m-d', Carbon::parse($value)),]),
         );
     }
@@ -72,7 +72,7 @@ class Reservation extends Model
         return Attribute::make(
             get: function (string $value) {
                 $value = Carbon::parse($value);
-                return auth()->user()->calendar == 'hijri' ? Hijri::Date('j F Y h:i:s A', Timezone::convertToLocal($value, 'Y-m-d h:i:s A')) : Carbon::parse(Timezone::convertToLocal($value, 'Y-m-d h:i:s A'))->translatedFormat('d F Y h:i:s A');
+                return auth()->user()?->calendar == 'hijri' ? Hijri::Date('j F Y h:i:s A', Timezone::convertToLocal($value, 'Y-m-d h:i:s A')) : Carbon::parse(Timezone::convertToLocal($value, 'Y-m-d h:i:s A'))->translatedFormat('d F Y h:i:s A');
             },
         );
     }

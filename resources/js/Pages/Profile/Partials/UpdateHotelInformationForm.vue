@@ -19,6 +19,9 @@ const props = defineProps({
     hotel: {
         type: Object,
     },
+    timezones: {
+        type: Array,
+    },
 });
 
 const user = usePage().props.auth.user;
@@ -31,6 +34,8 @@ const form = useForm({
     commercial_register: props.hotel.commercial_register,
     tax_number: props.hotel.tax_number,
     checkout_default_time: props.hotel.checkout_default_time,
+    auto_renew_after: props.hotel.auto_renew_after,
+    timezone: props.hotel.timezone,
 });
 
 // Logo
@@ -233,6 +238,54 @@ const deleteLogo = () => {
                     class="mt-2"
                     :message="form.errors.checkout_default_time"
                 />
+            </div>
+
+            <div>
+                <InputLabel
+                    for="auto_renew_after"
+                    :value="__('Auto Renew After')"
+                    required
+                />
+
+                <TextInput
+                    id="auto_renew_after"
+                    type="number"
+                    min="0"
+                    max="23"
+                    class="mt-1 block w-full"
+                    v-model="form.auto_renew_after"
+                />
+
+                <InputError
+                    class="mt-2"
+                    :message="form.errors.auto_renew_after"
+                />
+            </div>
+
+            <div>
+                <InputLabel
+                    for="hotel-timezones"
+                    :value="__('Timezone')"
+                    required
+                />
+
+                <select
+                    id="hotel-timezones"
+                    class="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 mt-1"
+                    style="direction: ltr"
+                    v-model="form.timezone"
+                >
+                    <option disabled>{{ __("Choose a option") }}</option>
+                    <option
+                        :value="timezone"
+                        v-for="(timezone, index) in timezones"
+                        :key="index"
+                    >
+                        {{ timezone }}
+                    </option>
+                </select>
+
+                <InputError class="mt-2" :message="form.errors.timezone" />
             </div>
 
             <div class="flex items-center gap-4">

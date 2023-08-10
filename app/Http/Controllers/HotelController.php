@@ -18,6 +18,7 @@ class HotelController extends Controller
         $settings->commercial_register = $request->validated()['commercial_register'];
         $settings->tax_number = $request->validated()['tax_number'];
         $settings->checkout_default_time = $request->validated()['checkout_default_time'];
+        $settings->timezone = $request->validated()['timezone'];
 
         if (array_key_exists('logo', $request->validated()) && $request->validated()['logo']) {
             if (File::exists(public_path($settings->logo))) File::delete(public_path($settings->logo));

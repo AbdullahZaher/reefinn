@@ -74,6 +74,7 @@ const deleteUser = () => {
         <td class="px-6 py-4 space-x-5 rtl:space-x-reverse whitespace-nowrap">
             <button
                 type="button"
+                :title="__('Edit User')"
                 @click="isEditUserModalOpen = true"
                 v-if="$page.props.auth.user.can.includes('edit users')"
             >
@@ -81,6 +82,7 @@ const deleteUser = () => {
             </button>
             <button
                 type="button"
+                :title="__('Delete User')"
                 @click="deleteUser"
                 v-if="
                     $page.props.auth.user.can.includes('delete users') &&

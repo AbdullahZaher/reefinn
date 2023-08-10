@@ -26,6 +26,10 @@ const emit = defineEmits(["close"]);
                 {{ reservation.guest_name }}
             </div>
             <div class="py-5 border px-6">
+                <span class="font-bold">{{ __("ID Type") }}:</span>
+                {{ __(reservation.id_type) }}
+            </div>
+            <div class="py-5 border px-6">
                 <span class="font-bold">{{ __("Guest ID") }}:</span>
                 {{ reservation.guest_id }}
             </div>
@@ -44,6 +48,30 @@ const emit = defineEmits(["close"]);
             <div class="py-5 border px-6">
                 <span class="font-bold">{{ __("Number Of Companions") }}:</span>
                 {{ reservation.number_of_companions }}
+            </div>
+            <div
+                class="py-5 border px-6 flex items-center gap-2 justify-center"
+                v-if="reservation.rating"
+            >
+                <span class="font-bold">{{ __("Guest Rating") }}:</span>
+
+                <div class="flex items-center">
+                    <template
+                        v-for="(i, j) in Array.from({ length: 5 })"
+                        :key="i"
+                    >
+                        <FontAwesomeIcon
+                            icon="fas fa-star"
+                            class="text-yellow-400"
+                            v-if="reservation.rating >= j + 1"
+                        />
+                        <FontAwesomeIcon
+                            icon="far fa-star"
+                            class="text-yellow-400"
+                            v-else
+                        />
+                    </template>
+                </div>
             </div>
         </div>
     </Modal>

@@ -13,6 +13,8 @@ class GeneralSettings extends Settings
     public string $commercial_register;
     public string $tax_number;
     public string $checkout_default_time;
+    public int $auto_renew_after;
+    public string $timezone;
 
     public array $reservation_lease_terms;
 

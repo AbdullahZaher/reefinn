@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Inertia\Inertia;
 use App\Models\Apartment;
 use App\Models\Reservation;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use App\Enums\ApartmentStateEnum;
@@ -15,7 +16,6 @@ use App\Enums\ReservationStateEnum;
 use App\Http\Requests\ReservationRequest;
 use App\Http\Resources\ReservationResource;
 use Illuminate\Validation\ValidationException;
-use JamesMills\LaravelTimezone\Facades\Timezone;
 
 class ReservationController extends Controller
 {
@@ -39,10 +39,23 @@ class ReservationController extends Controller
         if ($request->wantsJson())
             return ReservationResource::collection($reservations);
 
+        $idTypes = collect(config('custom.reservations.id_types'))->map(fn ($key, $value) => [
+            'id' => $value,
+            'value' => $key,
+        ]);
+
+        $paymentMethods = collect(config('custom.reservations.payment_methods'))->map(fn ($key, $value) => [
+            'id' => $value,
+            'value' => $key,
+            'image_url' => asset('imgs/' . Str::slug($key) . '.png'),
+        ]);
+
         return Inertia::render('Reservations', [
             'filters' => $filters,
             'reservations' => ReservationResource::collection($reservations),
             'states' => $states,
+            'idTypes' => $idTypes,
+            'paymentMethods' => $paymentMethods,
         ]);
     }
 
@@ -96,7 +109,9 @@ class ReservationController extends Controller
             $data['discount_amount'] = floor($data['discount_amount'] * 100) / 100;
             $data['total_price'] -= $data['discount_amount'];
 
-            if ((strtotime($request->validated()['checkin']) <= strtotime(Timezone::convertToLocal(now(), 'Y-m-d'))) && ($apartment->state == ApartmentStateEnum::Empty->value || $apartment->state == ApartmentStateEnum::Reserved->value)) {
+            if ($data['checkin_now'] && ($apartment->state == ApartmentStateEnum::Empty->value || $apartment->state == ApartmentStateEnum::Reserved->value)) {
+                unset($data['checkin_now']);
+
                 $reservation = Reservation::create($data + [
                     'apartment_id' => $apartment->id,
                     'state' => ReservationStateEnum::Checkin->value,
@@ -107,6 +122,8 @@ class ReservationController extends Controller
                     'current_reservation_id' => $reservation->id,
                 ]);
             } else {
+                unset($data['checkin_now']);
+
                 $reservation = Reservation::create($data + ['apartment_id' => $apartment->id, 'state' => ReservationStateEnum::Pending->value]);
 
                 if ($apartment->state == ApartmentStateEnum::Empty->value) {
@@ -270,7 +287,7 @@ class ReservationController extends Controller
             $reservation->delete();
         });
 
-        return redirect()->back()->with('toast', ['type' => 'success', 'message' => __('Reservation has been canceled.')]);
+        return redirect()->back()->with('toast', ['type' => 'success', 'message' => __('Reservation has been deleted.')]);
     }
 
     static function check_reservation_date($checkin, $checkout, $apartment, $reservation_id = null): bool

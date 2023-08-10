@@ -18,6 +18,8 @@ class ApartmentFactory extends Factory
     {
         return [
             'name' => random_int(100, 120),
+            'type' => random_int(1, count(config('custom.apartments.types'))),
+            'description' => random_int(1, count(config('custom.apartments.descriptions'))),
         ];
     }
 }

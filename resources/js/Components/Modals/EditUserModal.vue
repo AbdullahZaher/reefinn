@@ -41,6 +41,7 @@ const _submitHandler = () => {
         onSuccess: () => {
             emit("close");
         },
+        preserveScroll: true,
     });
 };
 </script>
@@ -50,6 +51,7 @@ const _submitHandler = () => {
         :headerTitle="`${__('Edit User Information for')} '${user.name}'`"
         :open="open"
         @close="$emit('close')"
+        :clickOutsideToClose="!_form.processing"
     >
         <form class="flex flex-wrap items-center gap-4">
             <div class="mb-6 flex gap-6 w-full flex-col md:flex-row">
@@ -203,12 +205,7 @@ const _submitHandler = () => {
                 </p>
             </div>
 
-            <div
-                class="flex items-center justify-end"
-                :class="[
-                    $page.props.locale.dir == 'ltr' ? 'ml-auto' : 'mr-auto',
-                ]"
-            >
+            <div class="flex items-center justify-end ltr:ml-auto rtl:mr-auto">
                 <button
                     type="submit"
                     class="text-white bg-blue-700 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 flex items-center justify-center space-x-2 rtl:space-x-reverse"

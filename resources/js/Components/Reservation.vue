@@ -13,6 +13,12 @@ const props = defineProps({
     reservation: {
         type: Object,
     },
+    idTypes: {
+        type: Object,
+    },
+    paymentMethods: {
+        type: Object,
+    },
     clickOutsideToClose: {
         type: Boolean,
     },
@@ -112,6 +118,8 @@ onUnmounted(() => {
             <EditReservationModal
                 :apartment="apartment"
                 :reservation="reservation"
+                :idTypes="idTypes"
+                :paymentMethods="paymentMethods"
                 :open="isEditReservationModalOpen"
                 @close="isEditReservationModalOpen = false"
                 v-if="

@@ -1,9 +1,10 @@
 <script setup>
 import Modal from "@/Components/Modals/Modal.vue";
-import { watch } from "vue";
+import { ref, watch } from "vue";
 import { useForm } from "@inertiajs/vue3";
 import Loader from "@/Components/Loader.vue";
 import SwitchableDatePicker from "@/Components/SwitchableDatePicker.vue";
+import { vOnClickOutside } from "@vueuse/components";
 import { __ } from "@/Composables/translations";
 
 const props = defineProps({
@@ -14,15 +15,28 @@ const props = defineProps({
     apartment: {
         type: Object,
     },
+    idTypes: {
+        type: Object,
+    },
+    paymentMethods: {
+        type: Object,
+    },
 });
 
 const emit = defineEmits(["close", "closeParent"]);
+
+const isSubmitButtonDropdownOpen = ref(false);
+const closeSubmitButtonDropdown = (e) => {
+    if (!e.target.classList.contains("no-outside-click") && !_form.processing)
+        isSubmitButtonDropdownOpen.value = false;
+};
 
 const _form = useForm({
     checkin: new Date().toISOString().split("T")[0],
     checkout: new Date(Date.now() + 24 * 60 * 60 * 1000)
         .toISOString()
         .split("T")[0],
+    id_type: "1",
     guest_id: "",
     guest_birthday: "",
     guest_name: "",
@@ -33,6 +47,9 @@ const _form = useForm({
     discount: "0.00",
     note: "",
     amounts_due: "0.00",
+    payment_method: "",
+    auto_renew: false,
+    checkin_now: false,
 });
 
 const updateTotalPrice = () => {
@@ -69,13 +86,15 @@ const discountBlurHandler = (event) => {
     event.target.value = _form.discount;
 };
 
-const _submitHandler = () => {
+const _submitHandler = (e, checkinNow = false) => {
     const prevState = props.apartment.state.toLowerCase();
+
+    _form.checkin_now = checkinNow;
+    if (!_form.checkin_now) isSubmitButtonDropdownOpen.value = false;
 
     _form.clearErrors();
 
     _form.post(route("reservations.store", props.apartment.id), {
-        preserveScroll: true,
         onSuccess: () => {
             _form.reset();
             emit("close");
@@ -86,6 +105,7 @@ const _submitHandler = () => {
             )
                 emit("closeParent");
         },
+        preserveScroll: true,
     });
 };
 </script>
@@ -95,6 +115,7 @@ const _submitHandler = () => {
         :headerTitle="`${__('Add Reservation For')} '${apartment.name}'`"
         :open="open"
         @close="$emit('close')"
+        :clickOutsideToClose="!_form.processing"
     >
         <form class="flex flex-wrap items-center gap-4">
             <div class="mb-6 flex gap-6 w-full flex-col md:flex-row">
@@ -137,8 +158,37 @@ const _submitHandler = () => {
                     </p>
                 </div>
             </div>
+
             <div class="mb-6 flex gap-6 w-full flex-col md:flex-row">
-                <div class="flex-1 w-full">
+                <div class="md:w-1/3 w-full">
+                    <label
+                        for="id_type"
+                        class="block mb-2 text-sm font-medium text-gray-900"
+                    >
+                        {{ __("ID Type") }}
+                        <span class="text-red-600 text-sm">*</span>
+                    </label>
+                    <select
+                        id="id_type"
+                        class="border border-gray-300 text-gray-900 bg-gray-50 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 mt-1 rtl"
+                        v-model="_form.id_type"
+                    >
+                        <option disabled>
+                            {{ __("Choose a option") }}
+                        </option>
+                        <option
+                            :value="id_type.id"
+                            v-for="(id_type, index) in idTypes"
+                            :key="index"
+                        >
+                            {{ __(id_type.value) }}
+                        </option>
+                    </select>
+                    <p class="text-sm text-red-600 mt-1">
+                        {{ _form.errors.id_type }}
+                    </p>
+                </div>
+                <div class="md:w-2/3 w-full">
                     <label
                         for="guest_id"
                         class="block mb-2 text-sm font-medium text-gray-900"
@@ -157,6 +207,9 @@ const _submitHandler = () => {
                         {{ _form.errors.guest_id }}
                     </p>
                 </div>
+            </div>
+
+            <div class="mb-6 flex gap-6 w-full flex-col md:flex-row">
                 <div class="flex-1 w-full">
                     <label
                         for="guest_birthday"
@@ -170,7 +223,7 @@ const _submitHandler = () => {
                         {{ _form.errors.guest_birthday }}
                     </p>
                 </div>
-                <div class="flex-1 w-full md:flex-initial md:w-24">
+                <div class="flex-1 w-full md:flex-initial md:w-32">
                     <label
                         for="number_of_companions"
                         class="block mb-2 text-sm font-medium text-gray-900"
@@ -192,7 +245,7 @@ const _submitHandler = () => {
                         {{ _form.errors.number_of_companions }}
                     </p>
                 </div>
-                <div class="flex-1 w-full md:flex-initial md:w-24">
+                <div class="flex-1 w-full md:flex-initial md:w-32">
                     <label
                         for="copy"
                         class="block mb-2 text-sm font-medium text-gray-900"
@@ -358,11 +411,151 @@ const _submitHandler = () => {
                 </p>
             </div>
 
+            <div class="mb-6 w-full">
+                <label
+                    for="payment_method"
+                    class="block mb-2 text-sm font-medium text-gray-900"
+                >
+                    {{ __("Payment Method") }}
+                    <span class="text-red-600 text-sm">*</span>
+                </label>
+                <div class="flex justify-center items-center flex-wrap gap-8">
+                    <div
+                        class="border p-2 h-36 flex items-center gap-5 cursor-pointer"
+                        :class="[
+                            _form.payment_method == method.id
+                                ? 'border-blue-500 border-2'
+                                : 'border',
+                        ]"
+                        v-for="method in paymentMethods"
+                        :key="method.id"
+                        @click="_form.payment_method = method.id"
+                    >
+                        <input
+                            type="radio"
+                            name="method"
+                            v-model="_form.payment_method"
+                            :value="method.id"
+                        />
+                        <img :src="method.image_url" class="w-20" />
+                    </div>
+                </div>
+                <p class="text-sm text-red-600 mt-1">
+                    {{ _form.errors.payment_method }}
+                </p>
+            </div>
+
             <div
-                class="flex items-center justify-end"
-                :class="[
-                    $page.props.locale.dir == 'ltr' ? 'ml-auto' : 'mr-auto',
-                ]"
+                class="mb-6 w-full flex items-center md:flex-row flex-col justify-center gap-5"
+            >
+                <label
+                    for="payment_method"
+                    class="block text-sm font-medium text-gray-900"
+                >
+                    {{ __("Auto Renew") }}:
+                </label>
+
+                <div class="flex items-center space-x-4 rtl:space-x-reverse">
+                    <span class="text-sm font-medium">
+                        {{ __("Off") }}
+                    </span>
+                    <button
+                        type="button"
+                        class="relative rounded-full focus:outline-none"
+                        @click="_form.auto_renew = !_form.auto_renew"
+                    >
+                        <div
+                            class="w-12 h-6 transition rounded-full shadow-md outline-none"
+                            :class="[
+                                _form.auto_renew
+                                    ? 'bg-blue-500'
+                                    : 'bg-gray-500',
+                            ]"
+                        ></div>
+
+                        <div
+                            class="absolute inline-flex items-center justify-center w-4 h-4 transition-all duration-200 ease-in-out transform bg-white rounded-full shadow-sm top-1 left-1"
+                            :class="{
+                                'translate-x-0 rtl:translate-x-6':
+                                    !_form.auto_renew,
+                                'translate-x-6 rtl:translate-x-0':
+                                    _form.auto_renew,
+                            }"
+                        ></div>
+                    </button>
+                    <span class="text-sm font-medium">
+                        {{ __("On") }}
+                    </span>
+                </div>
+            </div>
+
+            <div
+                class="flex items-center justify-end relative ltr:ml-auto rtl:mr-auto"
+                v-if="
+                    apartment.state.toLowerCase() == 'empty' ||
+                    apartment.state.toLowerCase() == 'reserved'
+                "
+            >
+                <button
+                    type="submit"
+                    class="text-white bg-blue-700 focus:outline-none font-medium text-sm px-5 py-2.5 flex items-center justify-center space-x-2 rtl:space-x-reverse ltr:rounded-l-lg rtl:rounded-r-lg"
+                    :class="[
+                        _form.processing
+                            ? 'bg-opacity-50'
+                            : 'hover:bg-blue-800',
+                    ]"
+                    @click.prevent="_submitHandler($event, true)"
+                    :disabled="_form.processing"
+                >
+                    <Loader v-if="_form.processing && !_form.checkin_now" />
+                    <span>{{ __("Check-in Reservation") }}</span>
+                </button>
+
+                <button
+                    type="button"
+                    @click.stop="
+                        if (!_form.processing)
+                            isSubmitButtonDropdownOpen =
+                                !isSubmitButtonDropdownOpen;
+                    "
+                    :class="[
+                        _form.processing
+                            ? 'bg-opacity-50'
+                            : 'hover:bg-blue-800',
+                    ]"
+                    :disabled="_form.processing"
+                    class="text-white bg-blue-700 focus:outline-none font-medium text-sm px-3.5 py-2.5 space-x-2 rtl:space-x-reverse ltr:rounded-r-lg rtl:rounded-l-lg ltr:border-l rtl:border-r no-outside-click"
+                >
+                    <FontAwesomeIcon
+                        icon="fas fa-caret-down"
+                        class="no-outside-click"
+                    />
+                </button>
+
+                <div
+                    v-if="isSubmitButtonDropdownOpen"
+                    v-on-click-outside="closeSubmitButtonDropdown"
+                    class="absolute top-12 ltr:left-3/4 rtl:right-3/4 py-2 w-48 bg-white rounded-md shadow-xl border-2 z-50"
+                >
+                    <button
+                        type="submit"
+                        @click.prevent="_submitHandler($event, false)"
+                        class="px-4 py-2 text-sm capitalize text-gray-900 w-full flex justify-start items-center space-x-2 rtl:space-x-reverse"
+                        :class="[
+                            _form.processing
+                                ? 'bg-opacity-50'
+                                : 'hover:bg-gray-300',
+                        ]"
+                    >
+                        <span>{{ __("Add The Reservation") }}</span>
+                        <Loader v-if="_form.processing && _form.checkin_now" />
+                    </button>
+                </div>
+            </div>
+
+            <div
+                class="flex items-center justify-end ltr:ml-auto rtl:mr-auto"
+                v-else
             >
                 <button
                     type="submit"
@@ -372,11 +565,11 @@ const _submitHandler = () => {
                             ? 'bg-opacity-50'
                             : 'hover:bg-blue-800',
                     ]"
-                    @click.prevent="_submitHandler"
+                    @click.prevent="_submitHandler($event, false)"
                     :disabled="_form.processing"
                 >
                     <Loader v-if="_form.processing" />
-                    <span>{{ __("Add") }}</span>
+                    <span>{{ __("Add The Reservation") }}</span>
                 </button>
             </div>
         </form>

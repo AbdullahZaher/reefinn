@@ -13,13 +13,13 @@ use App\Http\Controllers\ApartmentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\ReservationController;
-
+use App\Http\Controllers\TaxController;
 
 Route::get('/language/{language}', LocaleController::class)->name('language');
 
 Route::get('/apartments/{apartment}.ics', [CalendarController::class, 'icalendar'])->name('apartments.icalendar');
 
-Route::get('/reservations/{reservation}/invoice/print', InvoiceController::class)->name('reservations.invoice.print');
+Route::get('/reservations/{reservation}/invoice/print', [InvoiceController::class, 'reservation_invoice'])->name('reservations.invoice.print');
 
 Route::middleware('auth')->group(function () {
 
@@ -37,8 +37,13 @@ Route::middleware('auth')->group(function () {
 
     Route::prefix('reservations')->as('reservations.')->group(function () {
         Route::get('/', [ReservationController::class, 'index'])->middleware('permission:show reservations')->name('index');
+        Route::post('/search', [ReservationController::class, 'search'])->middleware('permission:show reservations')->name('search');
         Route::patch('/terms', [ReservationController::class, 'update_terms'])->middleware('permission:edit terms of the reservation lease')->name('terms.update');
+
         Route::get('/{reservation}/invoice', [ReservationController::class, 'invoice'])->middleware('permission:print reservations')->name('invoice');
+        Route::get('/{reservation}/receipt', [ReservationController::class, 'receipt_voucher'])->middleware('permission:print receipt vouchers')->name('receipt');
+        Route::get('/{reservation}/tax', [ReservationController::class, 'tax_invoice'])->middleware('permission:print tax invoices')->name('tax');
+
         Route::post('/{apartment}', [ReservationController::class, 'store'])->middleware('permission:create reservations')->name('store');
         Route::patch('/{reservation}/transfer', [ReservationController::class, 'transfer'])->middleware('permission:transfer reservations')->name('transfer');
         Route::patch('/{reservation}/checkin', [ReservationController::class, 'checkin'])->middleware('permission:checkin apartments')->name('checkin');
@@ -54,6 +59,9 @@ Route::middleware('auth')->group(function () {
 
         Route::post('/expenses', [ExpenseController::class, 'store'])->middleware('permission:create expenses')->name('expenses.store');
         Route::delete('/expenses/{expense}', [ExpenseController::class, 'destroy'])->middleware('permission:delete expenses')->name('expenses.destroy');
+
+        Route::post('/taxes', [TaxController::class, 'store'])->middleware('permission:create taxes')->name('taxes.store');
+        Route::delete('/taxes/{tax}', [TaxController::class, 'destroy'])->middleware('permission:delete taxes')->name('taxes.destroy');
     });
 
     Route::prefix('statistics')->as('statistics.')->group(function () {

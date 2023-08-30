@@ -17,6 +17,9 @@ const props = defineProps({
     apartmentDescriptions: {
         type: Object,
     },
+    reservationTypes: {
+        type: Object,
+    },
     idTypes: {
         type: Object,
     },
@@ -113,6 +116,7 @@ const viewMode = ref(usePage().props.auth.user.view_mode);
                             v-for="apartment in apartments.data"
                             :key="apartment.id"
                             :apartment="apartment"
+                            :reservationTypes="reservationTypes"
                             :idTypes="idTypes"
                             :paymentMethods="paymentMethods"
                         />
@@ -176,6 +180,7 @@ const viewMode = ref(usePage().props.auth.user.view_mode);
                                     v-for="apartment in apartments.data"
                                     :key="apartment.id"
                                     :apartment="apartment"
+                                    :reservationTypes="reservationTypes"
                                     :idTypes="idTypes"
                                     :paymentMethods="paymentMethods"
                                 />

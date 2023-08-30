@@ -13,6 +13,9 @@ const props = defineProps({
     reservation: {
         type: Object,
     },
+    reservationTypes: {
+        type: Object,
+    },
     idTypes: {
         type: Object,
     },
@@ -118,6 +121,7 @@ onUnmounted(() => {
             <EditReservationModal
                 :apartment="apartment"
                 :reservation="reservation"
+                :types="reservationTypes"
                 :idTypes="idTypes"
                 :paymentMethods="paymentMethods"
                 :open="isEditReservationModalOpen"

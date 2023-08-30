@@ -206,6 +206,7 @@ return [
         'password'                 => 'كلمة المرور',
         'password_confirmation'    => 'تأكيد كلمة المرور',
         'payment_method'           => 'طريقة الدفع',
+        'percentage'               => 'النسبة',
         'phone'                    => 'الهاتف',
         'photo'                    => 'الصورة',
         'postal_code'              => 'الرمز البريدي',

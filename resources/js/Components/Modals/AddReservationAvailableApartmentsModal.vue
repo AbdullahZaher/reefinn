@@ -16,6 +16,9 @@ const props = defineProps({
     reservation: {
         type: Object,
     },
+    reservationTypes: {
+        type: Object,
+    },
     idTypes: {
         type: Object,
     },
@@ -108,6 +111,7 @@ onMounted(async () => {
             :apartment="apartment"
             :checkin="reservation.checkin"
             :checkout="reservation.checkout"
+            :types="reservationTypes"
             :idTypes="idTypes"
             :paymentMethods="paymentMethods"
             :open="isAddReservationModalOpen"

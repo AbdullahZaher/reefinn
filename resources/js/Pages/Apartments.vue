@@ -26,6 +26,9 @@ const props = defineProps({
     apartmentDescriptions: {
         type: Object,
     },
+    reservationTypes: {
+        type: Object,
+    },
 });
 
 const apartments = ref(props.apartments);
@@ -150,6 +153,7 @@ watch(
                                         :apartmentDescriptions="
                                             apartmentDescriptions
                                         "
+                                        :reservationTypes="reservationTypes"
                                     />
                                 </tbody>
                             </table>

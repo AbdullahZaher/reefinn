@@ -11,6 +11,9 @@ const props = defineProps({
     reservation: {
         type: Object,
     },
+    reservationTypes: {
+        type: Object,
+    },
     idTypes: {
         type: Object,
     },
@@ -85,6 +88,7 @@ const deleteReservation = () => {
     <EditReservationModal
         :apartment="reservation.apartment"
         :reservation="reservation"
+        :types="reservationTypes"
         :idTypes="idTypes"
         :paymentMethods="paymentMethods"
         :open="isEditReservationModalOpen"
@@ -136,6 +140,15 @@ const deleteReservation = () => {
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
             {{ reservation.price_for_night + " " + __("SAR") }}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap space-x-1 rtl:space-x-reverse">
+            <template v-if="parseFloat(reservation.taxes_amount)">
+                <span>{{ reservation.taxes_amount + " " + __("SAR") }}</span>
+                <span class="text-xs"
+                    >({{ reservation.taxes_percentage }}%)</span
+                >
+            </template>
+            <span v-else>-</span>
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
             {{ reservation.total_price + " " + __("SAR") }}

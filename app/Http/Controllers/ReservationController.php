@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use App\Enums\ReservationStateEnum;
 use App\Http\Requests\ReservationRequest;
 use App\Http\Resources\ReservationResource;
+use App\Models\Tax;
 use Illuminate\Validation\ValidationException;
 
 class ReservationController extends Controller
@@ -54,9 +55,31 @@ class ReservationController extends Controller
             'filters' => $filters,
             'reservations' => ReservationResource::collection($reservations),
             'states' => $states,
+            'reservationTypes' => config('custom.reservations.types'),
             'idTypes' => $idTypes,
             'paymentMethods' => $paymentMethods,
         ]);
+    }
+
+    public function search(Request $request, GeneralSettings $settigns) {
+        abort_if(!$request->wantsJson(), 404);
+
+        $validated = $request->validate([
+            'query' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $reservations = Reservation::query()
+                                    ->with(['apartment'])
+                                    ->where('guest_id', 'LIKE', '%' . $validated['query'] . '%')
+                                    ->orWhere('guest_name', 'LIKE', '%' . $validated['query'] . '%')
+                                    ->orWhere('guest_phone', 'LIKE', '%' . $validated['query'] . '%')
+                                    ->orWhere(DB::raw('CONCAT(' . $settigns->branch_no . ', `id`, `r_id`)'), 'LIKE', '%' . $validated['query'] . '%')
+                                    ->orWhereHas('apartment', fn ($query) => $query->where('name', 'LIKE', '%' . $validated['query'] . '%'))
+                                    ->latest()
+                                    ->paginate(12);
+
+        return ReservationResource::collection($reservations);
+
     }
 
     public function invoice(Request $request, Reservation $reservation)
@@ -64,7 +87,25 @@ class ReservationController extends Controller
         abort_if(!$request->wantsJson(), 404);
 
         return response()->json([
-            'html' => (new InvoiceService($reservation))->generateReservationHtml(),
+            'html' => (new InvoiceService())->generateReservationInvoiceHtml($reservation),
+        ]);
+    }
+
+    public function receipt_voucher(Request $request, Reservation $reservation)
+    {
+        abort_if(!$request->wantsJson(), 404);
+
+        return response()->json([
+            'html' => (new InvoiceService())->generateReservationReceiptVoucherHtml($reservation),
+        ]);
+    }
+
+    public function tax_invoice(Request $request, Reservation $reservation)
+    {
+        abort_if(!$request->wantsJson(), 404);
+
+        return response()->json([
+            'html' => (new InvoiceService())->generateReservationTaxInvoiceHtml($reservation),
         ]);
     }
 
@@ -92,6 +133,10 @@ class ReservationController extends Controller
             $data['discount_amount'] = floor($data['discount_amount'] * 100) / 100;
             $data['total_price'] -= $data['discount_amount'];
 
+            $data['taxes_percentage'] = Tax::sum('percentage');
+            $data['taxes_amount'] = ($data['taxes_percentage'] / 100) * $data['total_price'];
+            $data['total_price'] += $data['taxes_amount'];
+
             if ($data['checkin_now'] && ($apartment->state == ApartmentStateEnum::Empty->value || $apartment->state == ApartmentStateEnum::Reserved->value)) {
                 unset($data['checkin_now']);
 
@@ -99,6 +144,7 @@ class ReservationController extends Controller
                     'apartment_id' => $apartment->id,
                     'state' => ReservationStateEnum::Checkin->value,
                 ]);
+                $reservation->taxes()->sync(Tax::pluck('id'));
 
                 $apartment->update([
                     'state' => ApartmentStateEnum::Inhabited->value,
@@ -110,6 +156,7 @@ class ReservationController extends Controller
                 unset($data['checkin_now']);
 
                 $reservation = Reservation::create($data + ['apartment_id' => $apartment->id, 'state' => ReservationStateEnum::Pending->value]);
+                $reservation->taxes()->sync(Tax::pluck('id'));
 
                 if ($apartment->state == ApartmentStateEnum::Empty->value) {
                     $apartment->update([
@@ -210,7 +257,14 @@ class ReservationController extends Controller
         $data['discount_amount'] = floor($data['discount_amount'] * 100) / 100;
         $data['total_price'] -= $data['discount_amount'];
 
-        $reservation->update($data);
+        $data['taxes_percentage'] = Tax::sum('percentage');
+        $data['taxes_amount'] = ($data['taxes_percentage'] / 100) * $data['total_price'];
+        $data['total_price'] += $data['taxes_amount'];
+
+        DB::transaction(function () use($reservation, $data) {
+            $reservation->update($data);
+            $reservation->taxes()->sync(Tax::pluck('id'));
+        });
 
         return redirect()->back()->with('toast', ['type' => 'success', 'message' => __('Reservation has been updated.')]);
     }
@@ -279,6 +333,32 @@ class ReservationController extends Controller
         return redirect()->back()->with('toast', ['type' => 'success', 'message' => __('Reservation has been deleted.')]);
     }
 
+    public function update_terms(GeneralSettings $settings, Request $request) {
+        $types_count = count(config('custom.reservations.types'));
+
+        $validated = $request->validate([
+            'terms' => ['required', 'array', 'min:' . $types_count, 'max:' . $types_count,],
+            'terms.*' => ['required', 'array',],
+            'terms.*.en' => ['required', 'string', 'max:3500',],
+            'terms.*.ar' => ['required', 'string', 'max:3500',],
+        ]);
+
+        $validated_terms = array_values($validated['terms']);
+        $terms = [];
+
+        for ($i = 1; $i <= $types_count; $i++) {
+            $terms[$i] = [
+                'en' => $validated_terms[$i-1]['en'],
+                'ar' => $validated_terms[$i-1]['ar'],
+            ];
+        }
+
+        $settings->reservation_lease_terms = $terms;
+        $settings->save();
+
+        return redirect()->back()->with('toast', ['type' => 'success', 'message' => __('Reservation terms has been updated.')]);
+    }
+
     static function check_reservation_date($checkin, $checkout, $apartment, $reservation_id = null): bool
     {
         return !Reservation::query()
@@ -298,21 +378,5 @@ class ReservationController extends Controller
                 ->whereColumn('checkin->gregorian', '!=', 'checkout->gregorian')
                 ->whereIn('state', [ReservationStateEnum::Pending->value, ReservationStateEnum::Checkin->value])
                 ->exists();
-    }
-
-    public function update_terms(GeneralSettings $settings, Request $request) {
-        $validated = $request->validate([
-            'terms' => ['required', 'array',],
-            'terms.en' => ['required', 'string', 'max:3500',],
-            'terms.ar' => ['required', 'string', 'max:3500',],
-        ]);
-
-        $settings->reservation_lease_terms = [
-            'en' => $validated['terms']['en'],
-            'ar' => $validated['terms']['ar'],
-        ];
-        $settings->save();
-
-        return redirect()->back()->with('toast', ['type' => 'success', 'message' => __('Reservation terms has been updated.')]);
     }
 }

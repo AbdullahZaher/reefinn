@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Tax;
 use Inertia\Middleware;
 use Tightenco\Ziggy\Ziggy;
 use Illuminate\Http\Request;
@@ -36,6 +37,9 @@ class HandleInertiaRequests extends Middleware
         $user = Auth::user() ? Auth::user()->load('permissions') : null;
 
         return array_merge(parent::share($request), [
+            'app' => [
+                'tax_percentage' => Tax::sum('percentage'),
+            ],
             'auth' => [
                 'user' => $user ? [
                     'id' => $user->id,

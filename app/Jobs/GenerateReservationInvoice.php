@@ -34,7 +34,7 @@ class GenerateReservationInvoice implements ShouldQueue
     {
         $filename = $this->generateFileName();
 
-        Browsershot::html((new \App\Services\InvoiceService($this->reservation))->generateReservationHtml())
+        Browsershot::html((new \App\Services\InvoiceService())->generateReservationInvoiceHtml($this->reservation))
             ->showBackground()
             ->margins(0, 0, 0, 0)
             ->format('A4')

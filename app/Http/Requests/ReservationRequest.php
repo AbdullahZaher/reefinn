@@ -23,6 +23,7 @@ class ReservationRequest extends FormRequest
     public function rules(Request $request): array
     {
         $data = [
+            'type' => ['required', 'integer', 'min:1', 'max:' . count(config('custom.reservations.types'))],
             'checkin' => $request->method() == 'POST' ? ['required', 'date', 'date_format:Y-m-d', 'after:yesterday',] : ['required', 'date', 'date_format:Y-m-d',],
             'checkout' => ['required', 'date', 'date_format:Y-m-d', 'after_or_equal:checkin',],
             'price_for_night' => ['required', 'numeric', 'min:0', 'max:999999.99',],

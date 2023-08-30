@@ -68,6 +68,7 @@ class DashboardController extends Controller
             'apartments' => ApartmentResource::collection($apartments),
             'apartmentTypes' => $apartmentTypes,
             'apartmentDescriptions' => $apartmentDescriptions,
+            'reservationTypes' => config('custom.reservations.types'),
             'idTypes' => $idTypes,
             'paymentMethods' => $paymentMethods,
         ]);

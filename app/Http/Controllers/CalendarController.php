@@ -48,6 +48,7 @@ class CalendarController extends Controller
             'filters' => $filters,
             'apartments' => ApartmentResource::collection($apartments),
             'reservations' => ReservationResource::collection($reservations),
+            'reservationTypes' => config('custom.reservations.types'),
             'idTypes' => $idTypes,
             'paymentMethods' => $paymentMethods,
         ]);

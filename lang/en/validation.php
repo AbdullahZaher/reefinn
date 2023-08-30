@@ -206,6 +206,7 @@ return [
         'password'                 => 'password',
         'password_confirmation'    => 'password confirmation',
         'payment_method'           => 'payment method',
+        'percentage'               => 'percentage',
         'phone'                    => 'phone',
         'photo'                    => 'photo',
         'postal_code'              => 'postal code',

@@ -19,6 +19,9 @@ defineProps({
     viewModes: {
         type: Array,
     },
+    reservationTypes: {
+        type: Object,
+    },
     terms: {
         type: Object,
     },
@@ -67,7 +70,10 @@ defineProps({
                         )
                     "
                 >
-                    <UpdateReservationLeaseTermsForm :terms="terms" />
+                    <UpdateReservationLeaseTermsForm
+                        :types="reservationTypes"
+                        :terms="terms"
+                    />
                 </div>
             </div>
         </div>

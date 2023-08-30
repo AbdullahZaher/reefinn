@@ -1,7 +1,7 @@
 <script setup>
 import Modal from "@/Components/Modals/Modal.vue";
-import { ref, watch } from "vue";
-import { useForm } from "@inertiajs/vue3";
+import { nextTick, ref, watch } from "vue";
+import { useForm, usePage } from "@inertiajs/vue3";
 import Loader from "@/Components/Loader.vue";
 import SwitchableDatePicker from "@/Components/SwitchableDatePicker.vue";
 import { vOnClickOutside } from "@vueuse/components";
@@ -28,6 +28,9 @@ const props = defineProps({
             .toISOString()
             .split("T")[0],
     },
+    types: {
+        type: Object,
+    },
     idTypes: {
         type: Object,
     },
@@ -42,6 +45,8 @@ const props = defineProps({
 
 const emit = defineEmits(["close", "closeParent"]);
 
+const showDates = ref(true);
+
 const isSubmitButtonDropdownOpen = ref(false);
 const closeSubmitButtonDropdown = (e) => {
     if (!e.target.classList.contains("no-outside-click") && !_form.processing)
@@ -49,6 +54,7 @@ const closeSubmitButtonDropdown = (e) => {
 };
 
 const _form = useForm({
+    type: "1",
     checkin: props.checkin,
     checkout: props.checkout,
     id_type: "1",
@@ -67,8 +73,39 @@ const _form = useForm({
     checkin_now: false,
 });
 
+watch(
+    () => _form.type,
+    async (value) => {
+        _form.checkin = new Date().toISOString().split("T")[0];
+
+        switch (value) {
+            case "1":
+                _form.checkout = new Date(Date.now() + 24 * 60 * 60 * 1000)
+                    .toISOString()
+                    .split("T")[0];
+                break;
+            case "2":
+                _form.checkout = new Date(Date.now() + 24 * 60 * 60 * 1000 * 7)
+                    .toISOString()
+                    .split("T")[0];
+                break;
+            case "3":
+                _form.checkout = new Date(Date.now() + 24 * 60 * 60 * 1000 * 30)
+                    .toISOString()
+                    .split("T")[0];
+                break;
+        }
+
+        // Refresh State
+        showDates.value = false;
+        await nextTick();
+        showDates.value = true;
+    }
+);
+
 const updateTotalPrice = () => {
     let totalPrice = 0;
+    let taxes = 0;
 
     if (
         _form.checkin &&
@@ -81,12 +118,21 @@ const updateTotalPrice = () => {
         let numberOfNights = Math.ceil(timeDiff / (1000 * 3600 * 24));
         if (_form.checkin == _form.checkout) numberOfNights = 1;
 
-        totalPrice =
-            _form.price_for_night * numberOfNights -
-            (_form.discount / 100) * _form.price_for_night * numberOfNights;
+        totalPrice = _form.price_for_night * numberOfNights;
+
+        totalPrice -= (_form.discount / 100) * totalPrice;
+
+        taxes = totalPrice * (usePage().props.app.tax_percentage / 100);
+        totalPrice += taxes;
     }
 
+    if (taxes < 0) taxes = 0;
     if (totalPrice < 0) totalPrice = 0;
+
+    _form.taxes_amount = `${new Intl.NumberFormat("en-US", {
+        maximumFractionDigits: 2,
+        minimumFractionDigits: 2,
+    }).format(taxes)} ${__("SAR")}`;
 
     _form.total_price = `${new Intl.NumberFormat("en-US", {
         maximumFractionDigits: 2,
@@ -134,6 +180,41 @@ const _submitHandler = (e, checkinNow = false) => {
         :clickOutsideToClose="!_form.processing"
     >
         <form class="flex flex-wrap items-center gap-4">
+            <div class="mx-auto flex-1 flex items-center gap-3 mb-3">
+                <label
+                    for="type"
+                    class="block text-sm font-medium text-gray-900 shrink-0"
+                >
+                    {{ __("Rent Method") }}
+                    <span class="text-red-600 text-sm">*</span> :
+                </label>
+
+                <div class="flex w-full relative">
+                    <template v-for="(type, key) in types" :key="key">
+                        <input
+                            type="radio"
+                            :id="`option-${key}`"
+                            name="tabs"
+                            class="appearance-none hidden"
+                            v-model="_form.type"
+                            :value="key"
+                        />
+                        <label
+                            :for="`option-${key}`"
+                            class="cursor-pointer w-1/6 flex items-center justify-center truncate uppercase select-none font-semibold text-lg rounded-full py-0.5 z-10"
+                            :class="{
+                                'text-white': _form.type == key,
+                            }"
+                        >
+                            {{ __(type) }}
+                        </label>
+                    </template>
+                    <div
+                        class="w-1/6 flex items-center justify-center truncate uppercase select-none font-semibold text-lg rounded-full p-0 h-full bg-indigo-600 absolute transform transition-transform tabAnim"
+                    ></div>
+                </div>
+            </div>
+
             <div class="mb-6 flex gap-6 w-full flex-col md:flex-row">
                 <div class="flex-1 w-full">
                     <label
@@ -322,6 +403,22 @@ const _submitHandler = (e, checkinNow = false) => {
                 </div>
                 <div class="flex-1 w-full">
                     <label
+                        for="taxes"
+                        class="block mb-2 text-sm font-medium text-gray-900"
+                    >
+                        {{ __("Taxes") }}
+                    </label>
+                    <input
+                        id="taxes"
+                        type="text"
+                        v-model="_form.taxes_amount"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                        required
+                        disabled
+                    />
+                </div>
+                <div class="flex-1 w-full">
+                    <label
                         for="total_price"
                         class="block mb-2 text-sm font-medium text-gray-900"
                     >
@@ -395,7 +492,10 @@ const _submitHandler = (e, checkinNow = false) => {
                 </div>
             </div>
 
-            <div class="mb-6 flex gap-6 w-full flex-col md:flex-row">
+            <div
+                class="mb-6 flex gap-6 w-full flex-col md:flex-row"
+                v-if="showDates"
+            >
                 <div class="flex-1 w-full">
                     <label
                         for="checkin"
@@ -423,6 +523,7 @@ const _submitHandler = (e, checkinNow = false) => {
                     </p>
                 </div>
             </div>
+
             <div class="mb-6 w-full">
                 <label
                     for="note"
@@ -623,5 +724,31 @@ const _submitHandler = (e, checkinNow = false) => {
 [dir="rtl"] .vti__dropdown-item {
     direction: ltr !important;
     text-align: left !important;
+}
+</style>
+
+<style>
+[dir="ltr"] #option-1:checked ~ div {
+    --tw-translate-x: 0%;
+}
+
+[dir="ltr"] #option-2:checked ~ div {
+    --tw-translate-x: 100%;
+}
+
+[dir="ltr"] #option-3:checked ~ div {
+    --tw-translate-x: 200%;
+}
+
+[dir="rtl"] #option-1:checked ~ div {
+    --tw-translate-x: -0%;
+}
+
+[dir="rtl"] #option-2:checked ~ div {
+    --tw-translate-x: -100%;
+}
+
+[dir="rtl"] #option-3:checked ~ div {
+    --tw-translate-x: -200%;
 }
 </style>

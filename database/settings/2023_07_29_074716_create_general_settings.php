@@ -15,9 +15,18 @@ return new class extends SettingsMigration
         $this->migrator->add('general.checkout_default_time', "13:00");
 
         $this->migrator->add('general.reservation_lease_terms', [
-            'en' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, vitae aliquam',
-
-            'ar' => 'لوريم ايبسوم دولار سيت اميت، كونسيكتيتور أديبيسسينج إليت. نولا أويسمود، نيسليجيت أليكوام أولتريسيس، نونك نيسل أليكويت نونك، فيتاي أليكوام'
+            1 => [
+                'en' => 'Daily Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, vitae aliquam',
+                'ar' => 'يومي لوريم ايبسوم دولار سيت اميت، كونسيكتيتور أديبيسسينج إليت. نولا أويسمود، نيسليجيت أليكوام أولتريسيس، نونك نيسل أليكويت نونك، فيتاي أليكوام'
+            ],
+            2 => [
+                'en' => 'Weekly Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, vitae aliquam',
+                'ar' => 'اسبوعي لوريم ايبسوم دولار سيت اميت، كونسيكتيتور أديبيسسينج إليت. نولا أويسمود، نيسليجيت أليكوام أولتريسيس، نونك نيسل أليكويت نونك، فيتاي أليكوام'
+            ],
+            3 => [
+                'en' => 'Monthly Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, vitae aliquam',
+                'ar' => 'شهري لوريم ايبسوم دولار سيت اميت، كونسيكتيتور أديبيسسينج إليت. نولا أويسمود، نيسليجيت أليكوام أولتريسيس، نونك نيسل أليكويت نونك، فيتاي أليكوام'
+            ],
         ]);
     }
 };

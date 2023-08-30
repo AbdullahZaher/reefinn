@@ -39,8 +39,6 @@ const getHtml = async () => {
         });
 };
 
-const print = () => {};
-
 onMounted(async () => {
     await getHtml();
 

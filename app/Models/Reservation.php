@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Tax;
 use App\Models\User;
 use App\Models\Apartment;
 use Illuminate\Support\Str;
@@ -94,6 +95,11 @@ class Reservation extends Model
 
     public function admin() {
         return $this->belongsTo(User::class, 'admin_id');
+    }
+
+    public function taxes()
+    {
+        return $this->belongsToMany(Tax::class)->withTrashed();
     }
 
     public function scopePending($query)

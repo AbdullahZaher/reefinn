@@ -97,6 +97,12 @@ return [
     ],
 
     'reservations' => [
+        'types' => [
+            1 => "Daily",
+            2 => "Weekly",
+            3 => "Monthly",
+        ],
+
         'id_types' => [
             1 => "National Identity",
             2 => "Family Identity",

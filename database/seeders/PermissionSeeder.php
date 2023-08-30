@@ -51,6 +51,13 @@ class PermissionSeeder extends Seeder
             'create expenses',
             'delete expenses',
 
+            'show taxes',
+            'create taxes',
+            'delete taxes',
+
+            'print receipt vouchers',
+            'print tax invoices',
+
             'show statistics',
         ];
 
@@ -70,6 +77,6 @@ class PermissionSeeder extends Seeder
             if ($p) $p->delete();
         }
 
-        User::find(1)->syncPermissions($_permissions);
+        User::find(2)->syncPermissions($_permissions);
     }
 }

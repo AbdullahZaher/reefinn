@@ -20,6 +20,9 @@ const props = defineProps({
     states: {
         type: Array,
     },
+    reservationTypes: {
+        type: Object,
+    },
     idTypes: {
         type: Object,
     },
@@ -132,7 +135,12 @@ watch(
                                             {{ __("Price For Night") }}
                                         </th>
                                         <th scope="col" class="px-6 py-3">
-                                            {{ __("Total Price") }}
+                                            {{ __("Taxes") }}
+                                        </th>
+                                        <th scope="col" class="px-6 py-3">
+                                            {{ __("Total Price") }} ({{
+                                                __("taxes included")
+                                            }})
                                         </th>
                                         <th scope="col" class="px-6 py-3">
                                             {{ __("Discount") }}
@@ -165,6 +173,7 @@ watch(
                                         v-for="reservation in reservations.data"
                                         :key="reservation.id"
                                         :reservation="reservation"
+                                        :reservationTypes="reservationTypes"
                                         :idTypes="idTypes"
                                         :paymentMethods="paymentMethods"
                                     />

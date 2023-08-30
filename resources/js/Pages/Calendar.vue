@@ -24,6 +24,9 @@ const props = defineProps({
     reservations: {
         type: Object,
     },
+    reservationTypes: {
+        type: Object,
+    },
     idTypes: {
         type: Object,
     },
@@ -222,6 +225,7 @@ const getiCalendarLink = () => {
         <AddReservationAvailableApartmentsModal
             :apartment="onlyOneAparment ? currentApartment : null"
             :reservation="addReservationData"
+            :reservationTypes="reservationTypes"
             :idTypes="idTypes"
             :paymentMethods="paymentMethods"
             :open="isAddReservationModalOpen"
@@ -235,6 +239,7 @@ const getiCalendarLink = () => {
         <EditReservationModal
             :apartment="currentReservation.apartment"
             :reservation="currentReservation"
+            :types="reservationTypes"
             :idTypes="idTypes"
             :paymentMethods="paymentMethods"
             :open="isEditReservationModalOpen"

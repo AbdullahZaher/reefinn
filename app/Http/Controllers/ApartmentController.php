@@ -46,6 +46,7 @@ class ApartmentController extends Controller
             'states' => $states,
             'apartmentTypes' => $apartmentTypes,
             'apartmentDescriptions' => $apartmentDescriptions,
+            'reservationTypes' => config('custom.reservations.types'),
         ]);
     }
 

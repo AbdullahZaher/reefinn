@@ -8,15 +8,30 @@ use App\Services\InvoiceService;
 
 class InvoiceController extends Controller
 {
-    /**
-     * Handle the incoming request.
-     */
-    public function __invoke($reservation)
+    public function reservation_invoice($reservation)
     {
         $reservation = Reservation::where('uuid', $reservation)->firstOrFail();
 
         return view('invoice', [
-            'html' => (new InvoiceService($reservation))->generateReservationHtml(),
+            'html' => (new InvoiceService())->generateReservationInvoiceHtml($reservation),
+        ]);
+    }
+
+    public function receipt_voucher($reservation)
+    {
+        $reservation = Reservation::where('uuid', $reservation)->firstOrFail();
+
+        return view('invoice', [
+            'html' => (new InvoiceService())->generateReservationReceiptVoucherHtml($reservation),
+        ]);
+    }
+
+    public function tax_invoice($reservation)
+    {
+        $reservation = Reservation::where('uuid', $reservation)->firstOrFail();
+
+        return view('invoice', [
+            'html' => (new InvoiceService())->generateReservationTaxInvoiceHtml($reservation),
         ]);
     }
 }

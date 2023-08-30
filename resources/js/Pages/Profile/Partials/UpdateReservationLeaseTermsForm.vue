@@ -2,21 +2,31 @@
 import InputError from "@/Components/InputError.vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
-import TextInput from "@/Components/TextInput.vue";
 import Loader from "@/Components/Loader.vue";
 import { useForm, usePage } from "@inertiajs/vue3";
 import { __ } from "@/Composables/translations";
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
 
 const props = defineProps({
+    types: {
+        type: Object,
+    },
     terms: {
         type: Object,
     },
 });
 
+const currentType = ref(1);
+
 const form = useForm({
     terms: props.terms,
 });
+
+const submitHandler = () => {
+    form.patch(route("reservations.terms.update"), {
+        preserveScroll: true,
+    });
+};
 
 onMounted(() => {
     document.querySelectorAll("textarea").forEach((element) => {
@@ -40,29 +50,47 @@ onMounted(() => {
             </h2>
         </header>
 
-        <form
-            @submit.prevent="
-                form.patch(route('reservations.terms.update'), {
-                    preserveScroll: true,
-                })
-            "
-            class="mt-6 space-y-6"
-        >
+        <div class="mx-auto my-8">
+            <div class="flex w-full relative">
+                <template v-for="(type, key) in types" :key="key">
+                    <input
+                        type="radio"
+                        :id="`option-${key}`"
+                        name="tabs"
+                        class="appearance-none hidden"
+                        v-model="currentType"
+                        :value="key"
+                    />
+                    <label
+                        :for="`option-${key}`"
+                        class="cursor-pointer w-1/6 flex items-center justify-center truncate uppercase select-none font-semibold text-lg rounded-full py-2 z-10"
+                        :class="{
+                            'text-white': currentType == key,
+                        }"
+                    >
+                        {{ __(type) }}
+                    </label>
+                </template>
+                <div
+                    class="w-1/6 flex items-center justify-center truncate uppercase select-none font-semibold text-lg rounded-full p-0 h-full bg-indigo-600 absolute transform transition-transform tabAnim"
+                ></div>
+            </div>
+        </div>
+
+        <form @submit.prevent="submitHandler" class="mt-6 space-y-6">
             <div>
                 <InputLabel
                     for="terms_en"
                     :value="__('Terms In English')"
                     required
                 />
-
                 <textarea
                     id="terms_en"
                     class="mt-1 block w-full"
-                    v-model="form.terms['en']"
+                    v-model="form.terms[currentType]['en']"
                     oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"'
                     dir="ltr"
                 ></textarea>
-
                 <InputError class="mt-2" :message="form.errors['terms.en']" />
             </div>
 
@@ -72,15 +100,13 @@ onMounted(() => {
                     :value="__('Terms In Arabic')"
                     required
                 />
-
                 <textarea
                     id="terms_ar"
                     class="mt-1 block w-full"
-                    v-model="form.terms['ar']"
+                    v-model="form.terms[currentType]['ar']"
                     oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"'
                     dir="rtl"
                 ></textarea>
-
                 <InputError class="mt-2" :message="form.errors['terms.ar']" />
             </div>
 
@@ -101,3 +127,29 @@ onMounted(() => {
         </form>
     </section>
 </template>
+
+<style>
+[dir="ltr"] #option-1:checked ~ div {
+    --tw-translate-x: 0%;
+}
+
+[dir="ltr"] #option-2:checked ~ div {
+    --tw-translate-x: 100%;
+}
+
+[dir="ltr"] #option-3:checked ~ div {
+    --tw-translate-x: 200%;
+}
+
+[dir="rtl"] #option-1:checked ~ div {
+    --tw-translate-x: -0%;
+}
+
+[dir="rtl"] #option-2:checked ~ div {
+    --tw-translate-x: -100%;
+}
+
+[dir="rtl"] #option-3:checked ~ div {
+    --tw-translate-x: -200%;
+}
+</style>

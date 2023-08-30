@@ -15,6 +15,9 @@ const props = defineProps({
     apartment: {
         type: Object,
     },
+    reservationTypes: {
+        type: Object,
+    },
     idTypes: {
         type: Object,
     },
@@ -85,6 +88,7 @@ const updateMaintenance = () => {
 
         <ShowReservationsModal
             :apartment="apartment"
+            :reservationTypes="reservationTypes"
             :idTypes="idTypes"
             :paymentMethods="paymentMethods"
             :open="isShowReservationsModalOpen"
@@ -99,6 +103,7 @@ const updateMaintenance = () => {
         <EditReservationModal
             :apartment="apartment"
             :reservation="apartment.current_reservation"
+            :types="reservationTypes"
             :idTypes="idTypes"
             :paymentMethods="paymentMethods"
             :open="isEditReservationModalOpen"

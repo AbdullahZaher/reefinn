@@ -59,6 +59,7 @@ class ProfileController extends Controller
             'timezones' => DateTimeZone::listIdentifiers(DateTimeZone::ALL),
             'calendars' => $calendars,
             'viewModes' => $viewModes,
+            'reservationTypes' => config('custom.reservations.types'),
             'terms' => $settings->reservation_lease_terms,
         ]);
     }

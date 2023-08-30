@@ -27,7 +27,7 @@ const getHtml = async () => {
     await axios
         .get(props.routeUrl)
         .then((response) => {
-            html.value = response.data;
+            html.value = response.data.html;
         })
         .catch(async () => {
             await Swal.fire({
@@ -50,7 +50,6 @@ onMounted(async () => {
         elmId,
         {
             windowTitle: props.windowTitle,
-            styles: [usePage().props.styleUrl],
         },
         () => emit("close")
     );

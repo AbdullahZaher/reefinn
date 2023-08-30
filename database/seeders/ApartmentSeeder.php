@@ -15,19 +15,42 @@ class ApartmentSeeder extends Seeder
      */
     public function run(): void
     {
+        $states = collect(ApartmentStateEnum::toArray())->except(ApartmentStateEnum::Maintenance->value)->pluck('key');
         $i = 0;
 
         Apartment::factory([
             'name' => function () use (&$i) {
                 return 100 + $i++;
             },
-            'state' => 1,
-        ])->count(20)->create();
+            'state' => fn () => $states->random(),
+        ])->count(26)->create();
 
-        Apartment::all()->each(
-            fn (Apartment $apartment) => $apartment->reservations()->saveMany(
-                Reservation::factory(5)->make()
-            )
-        );
+        Apartment::where('state', ApartmentStateEnum::Reserved->value)->get()->each(function (Apartment $apartment) {
+            Reservation::factory(random_int(1, 5))->create([
+                'apartment_id' => $apartment->id,
+            ]);
+        });
+
+        Apartment::where('state', ApartmentStateEnum::Inhabited->value)->get()->each(function (Apartment $apartment) {
+            $reservation = Reservation::factory()->create([
+                'apartment_id' => $apartment->id,
+                'checkin' => now()->subDays(random_int(1, 30))->format('Y-m-d'),
+                'checkout' => now()->addDays(random_int(1, 30))->format('Y-m-d'),
+            ]);
+
+            $apartment->update([
+                'current_reservation_id' => $reservation->id,
+            ]);
+
+            Reservation::factory(random_int(0, 2))->create([
+                'apartment_id' => $apartment->id,
+            ]);
+        });
+
+        Apartment::where('state', ApartmentStateEnum::Cleaning->value)->get()->each(function (Apartment $apartment) {
+            Reservation::factory(random_int(0, 3))->create([
+                'apartment_id' => $apartment->id,
+            ]);
+        });
     }
 }

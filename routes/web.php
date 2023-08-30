@@ -4,15 +4,22 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\HotelController;
 use App\Http\Controllers\LocaleController;
+use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\FinanceController;
+use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\ApartmentController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\StatisticsController;
 use App\Http\Controllers\ReservationController;
 
+
 Route::get('/language/{language}', LocaleController::class)->name('language');
+
+Route::get('/apartments/{apartment}.ics', [CalendarController::class, 'icalendar'])->name('apartments.icalendar');
+
+Route::get('/reservations/{reservation}/invoice/print', InvoiceController::class)->name('reservations.invoice.print');
 
 Route::middleware('auth')->group(function () {
 
@@ -31,7 +38,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('reservations')->as('reservations.')->group(function () {
         Route::get('/', [ReservationController::class, 'index'])->middleware('permission:show reservations')->name('index');
         Route::patch('/terms', [ReservationController::class, 'update_terms'])->middleware('permission:edit terms of the reservation lease')->name('terms.update');
-        Route::get('/{reservation}', [ReservationController::class, 'invoice'])->middleware('permission:print reservations')->name('invoice');
+        Route::get('/{reservation}/invoice', [ReservationController::class, 'invoice'])->middleware('permission:print reservations')->name('invoice');
         Route::post('/{apartment}', [ReservationController::class, 'store'])->middleware('permission:create reservations')->name('store');
         Route::patch('/{reservation}/transfer', [ReservationController::class, 'transfer'])->middleware('permission:transfer reservations')->name('transfer');
         Route::patch('/{reservation}/checkin', [ReservationController::class, 'checkin'])->middleware('permission:checkin apartments')->name('checkin');
@@ -39,6 +46,8 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{reservation}/cancel', [ReservationController::class, 'cancel'])->middleware('permission:cancel reservations')->name('cancel');
         Route::delete('/{reservation}', [ReservationController::class, 'destroy'])->middleware('permission:delete reservations')->name('destroy');
     });
+
+    Route::get('/calendar', [CalendarController::class, 'index'])->middleware('permission:show calendar')->name('calendar.index');
 
     Route::prefix('finance')->as('finance.')->group(function () {
         Route::get('/', [FinanceController::class, 'index'])->middleware('permission:show finance')->name('index');

@@ -59,17 +59,29 @@ class ApartmentController extends Controller
     public function available(Request $request)
     {
         $validated = $request->validate([
+            'apartment' => ['nullable', 'integer', 'exists:apartments,id'],
             'checkin' => ['required', 'date'],
             'checkout' => ['required', 'date'],
         ]);
 
-        $apartments = Apartment::query()
-            ->with(['reservations'])
-            ->orderBy('name')
-            ->get()
-            ->filter(fn ($apartment) => ReservationController::check_reservation_date($validated['checkin'], $validated['checkout'], $apartment));
+        if (isset($validated['apartment']) && $validated['apartment']) {
+            $apartment = Apartment::find($validated['apartment']);
 
-        return ApartmentResource::collection($apartments);
+            $status = ReservationController::check_reservation_date($validated['checkin'], $validated['checkout'], $apartment);
+
+            return response()->json([
+                'status' => $status,
+            ]);
+        } else {
+            $apartments = Apartment::query()
+                ->with(['reservations'])
+                ->orderBy('name')
+                ->get()
+                ->filter(fn ($apartment) => ReservationController::check_reservation_date($validated['checkin'], $validated['checkout'], $apartment));
+
+            return ApartmentResource::collection($apartments);
+        }
+
     }
 
     public function update(ApartmentRequest $request, Apartment $apartment)
@@ -150,8 +162,8 @@ class ApartmentController extends Controller
     public function destroy(Apartment $apartment)
     {
         DB::transaction(function () use ($apartment) {
-            $apartment->records()->delete();
-            $apartment->reservations()->delete();
+            $apartment->records()->forceDelete();
+            $apartment->reservations()->forceDelete();
             $apartment->delete();
         });
 

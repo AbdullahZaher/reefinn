@@ -19,7 +19,7 @@ class ReservationFactory extends Factory
     public function definition(): array
     {
         $checkin = $this->faker->dateTimeBetween('now', '+1 week');
-        $checkout = $this->faker->dateTimeBetween('+1 week', '+6 week');
+        $checkout = $this->faker->dateTimeBetween('+1 week', '+14 week');
         $number_of_nights = Carbon::parse($checkout->format('Y-m-d'))->diffInDays(Carbon::parse($checkin->format('Y-m-d')));
         $price_for_night = random_int(100, 1000);
 
@@ -34,7 +34,7 @@ class ReservationFactory extends Factory
             'guest_name' => $this->faker->name,
             'guest_id' => random_int(1000000, 9999999),
             'copy' => random_int(1, 10),
-            'guest_phone' => $this->faker->phoneNumber,
+            'guest_phone' => $this->faker->e164PhoneNumber(),
             'guest_birthday' => $this->faker->date('Y-m-d'),
             'number_of_companions' => random_int(0, 10),
             'admin_id' => 1,

@@ -68,6 +68,18 @@ const showingNavigationDropdown = ref(false);
                                 </NavLink>
 
                                 <NavLink
+                                    :href="route('calendar.index')"
+                                    :active="route().current('calendar.index')"
+                                    v-if="
+                                        $page.props.auth.user.can.includes(
+                                            'show calendar'
+                                        )
+                                    "
+                                >
+                                    {{ __("Calendar") }}
+                                </NavLink>
+
+                                <NavLink
                                     :href="route('apartments.index')"
                                     :active="
                                         route().current('apartments.index')
@@ -274,6 +286,18 @@ const showingNavigationDropdown = ref(false);
                             "
                         >
                             {{ __("Reservations") }}
+                        </ResponsiveNavLink>
+
+                        <ResponsiveNavLink
+                            :href="route('calendar.index')"
+                            :active="route().current('calendar.index')"
+                            v-if="
+                                $page.props.auth.user.can.includes(
+                                    'show calendar'
+                                )
+                            "
+                        >
+                            {{ __("Calendar") }}
                         </ResponsiveNavLink>
 
                         <ResponsiveNavLink

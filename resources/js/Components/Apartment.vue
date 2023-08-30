@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from "vue";
-import { router } from "@inertiajs/vue3";
+import { Link, router } from "@inertiajs/vue3";
 import ShowApartmentDetailsModal from "@/Components/Modals/ShowApartmentDetailsModal.vue";
 import ShowApartmentRecordsModal from "@/Components/Modals/ShowApartmentRecordsModal.vue";
 import ShowReservationsModal from "@/Components/Modals/ShowReservationsModal.vue";
@@ -183,8 +183,7 @@ const updateMaintenance = () => {
                         isCheckoutReservationModalOpen &&
                         $page.props.auth.user.can.includes(
                             'checkout apartments'
-                        ) &&
-                        apartment.state.toLowerCase() == 'inhabited'
+                        )
                     "
                 />
 
@@ -194,10 +193,7 @@ const updateMaintenance = () => {
                     @close="isSubmitCleaningModalOpen = false"
                     v-if="
                         isSubmitCleaningModalOpen &&
-                        $page.props.auth.user.can.includes(
-                            'empty apartments'
-                        ) &&
-                        apartment.state.toLowerCase() == 'cleaning'
+                        $page.props.auth.user.can.includes('empty apartments')
                     "
                 />
 
@@ -212,7 +208,7 @@ const updateMaintenance = () => {
                     "
                 >
                     <FontAwesomeIcon
-                        icon="fas fa-calendar"
+                        icon="fas fa-table"
                         class="text-white text-[1.4rem] leading-8"
                     />
                 </button>
@@ -304,6 +300,25 @@ const updateMaintenance = () => {
                         />
                     </button>
                 </template>
+
+                <Link
+                    :href="
+                        route('calendar.index', {
+                            apartments: apartment.id,
+                            only_one: true,
+                        })
+                    "
+                    :title="__('Show reservations calendar')"
+                    v-if="
+                        $page.props.auth.user.can.includes('show calendar') &&
+                        apartment.state.toLowerCase() != 'maintenance'
+                    "
+                >
+                    <FontAwesomeIcon
+                        icon="fas fa-calendar-days"
+                        class="text-white text-[1.4rem] leading-8"
+                    />
+                </Link>
             </div>
         </div>
     </div>

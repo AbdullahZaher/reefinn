@@ -16,9 +16,9 @@ const props = defineProps({
 
 const loading = ref(false);
 
-const contentElement =
-    getCurrentInstance().parent.parent.exposed?.infinteScrollContentElement ??
-    document.documentElement;
+const contentElement = ref(
+    getCurrentInstance().parent.parent.exposed?.infinteScrollContentElement
+);
 
 let latestScrollTop = 0;
 const handleScroll = debounce((e) => {
@@ -34,11 +34,13 @@ const handleScroll = debounce((e) => {
     }
 }, 200);
 
-onMounted(() =>
+onMounted(() => {
+    if (!contentElement.value) contentElement.value = document.documentElement;
+
     contentElement?.value
         ? contentElement.value.addEventListener("scroll", handleScroll)
-        : window.addEventListener("scroll", handleScroll)
-);
+        : window.addEventListener("scroll", handleScroll);
+});
 
 onBeforeUnmount(() =>
     contentElement?.value

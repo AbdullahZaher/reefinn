@@ -8,10 +8,10 @@ use App\Models\Reservation;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use App\Services\InvoiceService;
 use App\Enums\ApartmentStateEnum;
 use App\Settings\GeneralSettings;
 use Illuminate\Support\Facades\DB;
-use Alkoumi\LaravelHijriDate\Hijri;
 use App\Enums\ReservationStateEnum;
 use App\Http\Requests\ReservationRequest;
 use App\Http\Resources\ReservationResource;
@@ -59,31 +59,12 @@ class ReservationController extends Controller
         ]);
     }
 
-    public function invoice(GeneralSettings $settings, Request $request, Reservation $reservation)
+    public function invoice(Request $request, Reservation $reservation)
     {
         abort_if(!$request->wantsJson(), 404);
 
-        $hotel = [
-            'logo' => $settings->logo ? 'data:image/png;base64,' . base64_encode(file_get_contents(public_path(app(\App\Settings\GeneralSettings::class)->logo))) : null,
-        ];
-
-        $calendar = auth()->user()->calendar;
-
-        $checkin = json_decode($reservation->getRawOriginal('checkin'))->gregorian;
-        $checkout = json_decode($reservation->getRawOriginal('checkout'))->gregorian;
-        $guest_birthday = json_decode($reservation->getRawOriginal('guest_birthday'))->gregorian;
-
-        $attrs = [
-            'checkin' => $calendar == 'hijri' ? Hijri::Date('j F Y', $checkin) : Carbon::parse($checkin)->translatedFormat('d F Y'),
-            'checkout' => $calendar == 'hijri' ? Hijri::Date('j F Y', $checkout) : Carbon::parse($checkout)->translatedFormat('d F Y'),
-            'guest_birthday' => $calendar == 'hijri' ? Hijri::Date('j F Y', $guest_birthday) : Carbon::parse($guest_birthday)->translatedFormat('d F Y'),
-            'reservation_lease_terms' => $settings->reservation_lease_terms[app()->getLocale()],
-        ];
-
-        return view('pdfs.reservation_invoice', [
-            'hotel' => $hotel,
-            'reservation' => $reservation,
-            'attrs' => $attrs,
+        return response()->json([
+            'html' => (new InvoiceService($reservation))->generateReservationHtml(),
         ]);
     }
 
@@ -96,6 +77,8 @@ class ReservationController extends Controller
 
         DB::transaction(function () use ($request, $apartment) {
             $data = $request->validated() + ['admin_id' => auth()->id()];
+
+            $data['guest_phone'] = phone($data['guest_phone'])->formatE164();
 
             if (!$request->user()->can('change reservation price for night')) $data['price_for_night'] = $apartment->price_for_night;
 
@@ -121,6 +104,8 @@ class ReservationController extends Controller
                     'state' => ApartmentStateEnum::Inhabited->value,
                     'current_reservation_id' => $reservation->id,
                 ]);
+
+                dispatch(new \App\Jobs\SendWelcomeMessageToGuest($reservation->id))->onQueue('default');
             } else {
                 unset($data['checkin_now']);
 
@@ -211,6 +196,8 @@ class ReservationController extends Controller
 
         $data = $request->validated();
 
+        $data['guest_phone'] = phone($data['guest_phone'])->formatE164();
+
         if (!$request->user()->can('change reservation price for night')) $data['price_for_night'] = $reservation->price_for_night;
 
         $data['number_of_nights'] = Carbon::parse($data['checkout'])->diffInDays(Carbon::parse($data['checkin']));
@@ -247,6 +234,8 @@ class ReservationController extends Controller
                 'current_reservation_id' => $reservation->id,
             ]);
         });
+
+        dispatch(new \App\Jobs\SendWelcomeMessageToGuest($reservation->id))->onQueue('default');
 
         return redirect()->back()->with('toast', ['type' => 'success', 'message' => __('Reservation has been updated.')]);
     }

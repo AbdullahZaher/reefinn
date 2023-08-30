@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from "vue";
-import { router } from "@inertiajs/vue3";
+import { router, Link } from "@inertiajs/vue3";
 import ShowApartmentDetailsModal from "@/Components/Modals/ShowApartmentDetailsModal.vue";
 import ShowApartmentRecordsModal from "@/Components/Modals/ShowApartmentRecordsModal.vue";
 import ShowReservationsModal from "@/Components/Modals/ShowReservationsModal.vue";
@@ -130,8 +130,7 @@ const updateMaintenance = () => {
             @close="isCheckoutReservationModalOpen = false"
             v-if="
                 isCheckoutReservationModalOpen &&
-                $page.props.auth.user.can.includes('checkout apartments') &&
-                apartment.state.toLowerCase() == 'inhabited'
+                $page.props.auth.user.can.includes('checkout apartments')
             "
         />
 
@@ -141,8 +140,7 @@ const updateMaintenance = () => {
             @close="isSubmitCleaningModalOpen = false"
             v-if="
                 isSubmitCleaningModalOpen &&
-                $page.props.auth.user.can.includes('empty apartments') &&
-                apartment.state.toLowerCase() == 'cleaning'
+                $page.props.auth.user.can.includes('empty apartments')
             "
         />
 
@@ -228,7 +226,7 @@ const updateMaintenance = () => {
                         ) && apartment.state.toLowerCase() != 'maintenance'
                     "
                 >
-                    <FontAwesomeIcon icon="fas fa-calendar" class="text-sm" />
+                    <FontAwesomeIcon icon="fas fa-table" class="text-sm" />
                 </button>
                 <template v-if="apartment.state.toLowerCase() == 'inhabited'">
                     <button
@@ -308,6 +306,26 @@ const updateMaintenance = () => {
                         <FontAwesomeIcon icon="fas fa-unlock" class="text-sm" />
                     </button>
                 </template>
+
+                <Link
+                    :href="
+                        route('calendar.index', {
+                            apartments: apartment.id,
+                            only_one: true,
+                        })
+                    "
+                    :title="__('Show reservations calendar')"
+                    v-if="
+                        $page.props.auth.user.can.includes('show calendar') &&
+                        apartment.state.toLowerCase() != 'maintenance'
+                    "
+                >
+                    <FontAwesomeIcon
+                        icon="fas fa-calendar-days"
+                        class="text-sm"
+                    />
+                </Link>
+
                 <button
                     type="click"
                     :title="__('Show Apartment Details')"

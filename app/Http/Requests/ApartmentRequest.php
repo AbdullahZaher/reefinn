@@ -26,6 +26,7 @@ class ApartmentRequest extends FormRequest
             'type' => ['required', 'integer', 'min:1', 'max:' . count(config('custom.apartments.types'))],
             'description' => ['required', 'integer', 'min:1', 'max:' . count(config('custom.apartments.descriptions'))],
             'price_for_night' => ['required', 'numeric', 'min:0'],
+            'note' => ['nullable', 'string', 'max:1000'],
         ];
     }
 }

@@ -15,6 +15,7 @@ class GeneralSettings extends Settings
     public string $checkout_default_time;
     public int $auto_renew_after;
     public string $timezone;
+    public string $location;
 
     public array $reservation_lease_terms;
 

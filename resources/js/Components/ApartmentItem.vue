@@ -108,6 +108,9 @@ const deleteApartment = () => {
         <td class="px-6 py-4 whitespace-nowrap">
             {{ apartment.price_for_night + " " + __("SAR") }}
         </td>
+        <td class="px-6 py-4 break-all">
+            {{ apartment.note ?? "-" }}
+        </td>
         <td
             class="px-6 py-4 flex items-center justify-center gap-5 whitespace-nowrap"
         >

@@ -84,9 +84,7 @@ watch(
                     <div
                         class="text-center pb-12 flex items-center justify-between flex-col lg:flex-row space-y-6 lg:space-y-0"
                     >
-                        <h1
-                            class="font-bold text-5xl font-heading text-gray-900"
-                        >
+                        <h1 class="font-bold text-5xl text-gray-900">
                             {{ __("Apartments") }}
                         </h1>
                         <Dropdown
@@ -131,6 +129,9 @@ watch(
                                         </th>
                                         <th scope="col" class="px-6 py-3">
                                             {{ __("Price For Night") }}
+                                        </th>
+                                        <th scope="col" class="px-6 py-3">
+                                            {{ __("Note") }}
                                         </th>
                                         <th
                                             scope="col"

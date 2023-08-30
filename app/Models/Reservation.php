@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\User;
 use App\Models\Apartment;
+use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
 use App\Settings\GeneralSettings;
 use Alkoumi\LaravelHijriDate\Hijri;
@@ -25,6 +26,7 @@ class Reservation extends Model
 
     public $appends = [
         'reservationNumber',
+        'invoiceUrl',
     ];
 
     public static function boot()
@@ -32,6 +34,7 @@ class Reservation extends Model
         parent::boot();
 
         static::creating(function ($model) {
+            $model->uuid = Str::uuid()->toString();
             $model->r_id = rand(100, 999);
         });
     }
@@ -74,6 +77,13 @@ class Reservation extends Model
                 $value = Carbon::parse($value);
                 return auth()->user()?->calendar == 'hijri' ? Hijri::Date('j F Y h:i:s A', Timezone::convertToLocal($value, 'Y-m-d h:i:s A')) : Carbon::parse(Timezone::convertToLocal($value, 'Y-m-d h:i:s A'))->translatedFormat('d F Y h:i:s A');
             },
+        );
+    }
+
+    protected function invoiceUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->invoice_file_name ? asset('storage/reservations/invoices/' . $this->uuid . '.pdf') : null,
         );
     }
 

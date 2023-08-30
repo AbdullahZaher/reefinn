@@ -23,6 +23,11 @@ onMounted(() => {
         if (element.scrollHeight > element.offsetHeight) {
             element.style.height = element.scrollHeight + 20 + "px";
         }
+
+        element.addEventListener("input", (event) => {
+            event.target.style.height = "auto";
+            event.target.style.height = event.target.scrollHeight + 20 + "px";
+        });
     });
 });
 </script>

@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import InputError from "@/Components/InputError.vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
@@ -34,8 +34,9 @@ const form = useForm({
     commercial_register: props.hotel.commercial_register,
     tax_number: props.hotel.tax_number,
     checkout_default_time: props.hotel.checkout_default_time,
-    auto_renew_after: props.hotel.auto_renew_after,
+    auto_renew_after: props.hotel.auto_renew_after.toString(),
     timezone: props.hotel.timezone,
+    location: props.hotel.location,
 });
 
 // Logo
@@ -286,6 +287,19 @@ const deleteLogo = () => {
                 </select>
 
                 <InputError class="mt-2" :message="form.errors.timezone" />
+            </div>
+
+            <div>
+                <InputLabel for="location" :value="__('Location')" required />
+
+                <TextInput
+                    id="location"
+                    type="text"
+                    class="mt-1 block w-full"
+                    v-model="form.location"
+                />
+
+                <InputError class="mt-2" :message="form.errors.location" />
             </div>
 
             <div class="flex items-center gap-4">

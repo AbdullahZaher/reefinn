@@ -13,6 +13,7 @@ export default {
     safelist: [
         {
             pattern: /bg-+/,
+            variants: ["hover"],
         },
     ],
 

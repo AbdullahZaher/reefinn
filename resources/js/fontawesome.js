@@ -18,7 +18,6 @@ import {
     faBan,
     faPersonWalkingArrowRight,
     faTrash,
-    faCalendar,
     faMicrochip,
     faCaretDown,
     faPrint,
@@ -32,6 +31,8 @@ import {
     faList,
     faTableCellsLarge,
     faStar,
+    faCalendarDays,
+    faTable,
 } from "@fortawesome/free-solid-svg-icons";
 
 import { faStar as faStarR } from "@fortawesome/free-regular-svg-icons";
@@ -50,7 +51,6 @@ export default function initFontawesome() {
         faBan,
         faPersonWalkingArrowRight,
         faTrash,
-        faCalendar,
         faMicrochip,
         faCaretDown,
         faPrint,
@@ -64,7 +64,9 @@ export default function initFontawesome() {
         faList,
         faTableCellsLarge,
         faStar,
-        faStarR
+        faStarR,
+        faCalendarDays,
+        faTable
     );
 
     return FontAwesomeIcon;

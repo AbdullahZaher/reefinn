@@ -5,7 +5,10 @@ import { useForm } from "@inertiajs/vue3";
 import Loader from "@/Components/Loader.vue";
 import SwitchableDatePicker from "@/Components/SwitchableDatePicker.vue";
 import { vOnClickOutside } from "@vueuse/components";
+import { VueTelInput } from "vue-tel-input";
 import { __ } from "@/Composables/translations";
+
+import "vue-tel-input/vue-tel-input.css";
 
 const props = defineProps({
     open: {
@@ -15,11 +18,25 @@ const props = defineProps({
     apartment: {
         type: Object,
     },
+    checkin: {
+        type: String,
+        default: new Date().toISOString().split("T")[0],
+    },
+    checkout: {
+        type: String,
+        default: new Date(Date.now() + 24 * 60 * 60 * 1000)
+            .toISOString()
+            .split("T")[0],
+    },
     idTypes: {
         type: Object,
     },
     paymentMethods: {
         type: Object,
+    },
+    forceParentClose: {
+        type: Boolean,
+        default: false,
     },
 });
 
@@ -32,10 +49,8 @@ const closeSubmitButtonDropdown = (e) => {
 };
 
 const _form = useForm({
-    checkin: new Date().toISOString().split("T")[0],
-    checkout: new Date(Date.now() + 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split("T")[0],
+    checkin: props.checkin,
+    checkout: props.checkout,
     id_type: "1",
     guest_id: "",
     guest_birthday: "",
@@ -100,8 +115,9 @@ const _submitHandler = (e, checkinNow = false) => {
             emit("close");
 
             if (
-                props.apartment.state.toLowerCase() == "inhabited" &&
-                prevState != "inhabited"
+                (props.apartment.state.toLowerCase() == "inhabited" &&
+                    prevState != "inhabited") ||
+                props.forceParentClose
             )
                 emit("closeParent");
         },
@@ -146,13 +162,22 @@ const _submitHandler = (e, checkinNow = false) => {
                         {{ __("Guest Phone") }}
                         <span class="text-red-600 text-sm">*</span>
                     </label>
-                    <input
-                        id="phone"
-                        type="text"
+                    <VueTelInput
                         v-model="_form.guest_phone"
-                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                        required
-                    />
+                        :dropdownOptions="{
+                            disabled: false,
+                            showSearchBox: true,
+                            showFlags: true,
+                            searchPlaceholder: __('Search...'),
+                            showDialCodeInList: false,
+                        }"
+                        :inputOptions="{
+                            required: true,
+                            showDialCode: true,
+                            placeholder: __('Phone Number'),
+                        }"
+                        mode="international"
+                    ></VueTelInput>
                     <p class="text-sm text-red-600 mt-1">
                         {{ _form.errors.guest_phone }}
                     </p>
@@ -311,6 +336,9 @@ const _submitHandler = (e, checkinNow = false) => {
                         disabled
                     />
                 </div>
+            </div>
+
+            <div class="mb-6 flex gap-6 w-full flex-col md:flex-row">
                 <div
                     class="flex-1 w-full"
                     v-if="$page.props.auth.user.max_discount > 0"
@@ -344,7 +372,29 @@ const _submitHandler = (e, checkinNow = false) => {
                         {{ _form.errors.discount }}
                     </p>
                 </div>
+                <div class="flex-1 w-full">
+                    <label
+                        for="amounts_due"
+                        class="block mb-2 text-sm font-medium text-gray-900"
+                    >
+                        {{ __("Amounts Due") }}
+                        <span class="text-red-600 text-sm">*</span>
+                    </label>
+                    <input
+                        id="amounts_due"
+                        type="number"
+                        min="0"
+                        step="0.1"
+                        v-model="_form.amounts_due"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                        required
+                    />
+                    <p class="text-sm text-red-600 mt-1">
+                        {{ _form.errors.amounts_due }}
+                    </p>
+                </div>
             </div>
+
             <div class="mb-6 flex gap-6 w-full flex-col md:flex-row">
                 <div class="flex-1 w-full">
                     <label
@@ -387,28 +437,6 @@ const _submitHandler = (e, checkinNow = false) => {
                     required
                 ></textarea>
                 <p class="text-sm text-red-600 mt-1">{{ _form.errors.note }}</p>
-            </div>
-
-            <div class="mb-6 w-full">
-                <label
-                    for="amounts_due"
-                    class="block mb-2 text-sm font-medium text-gray-900"
-                >
-                    {{ __("Amounts Due") }}
-                    <span class="text-red-600 text-sm">*</span>
-                </label>
-                <input
-                    id="amounts_due"
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    v-model="_form.amounts_due"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                    required
-                />
-                <p class="text-sm text-red-600 mt-1">
-                    {{ _form.errors.amounts_due }}
-                </p>
             </div>
 
             <div class="mb-6 w-full">
@@ -575,3 +603,25 @@ const _submitHandler = (e, checkinNow = false) => {
         </form>
     </Modal>
 </template>
+
+<style>
+[dir="rtl"] .vti__dropdown-list {
+    right: 0 !important;
+}
+
+[dir="rtl"] .vti__dropdown-item {
+    text-align: right !important;
+    unicode-bidi: plaintext !important;
+}
+
+[dir="rtl"] .vti__input {
+    direction: ltr !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+}
+
+[dir="rtl"] .vti__dropdown-item {
+    direction: ltr !important;
+    text-align: left !important;
+}
+</style>

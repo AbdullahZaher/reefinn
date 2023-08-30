@@ -39,6 +39,8 @@ class PermissionSeeder extends Seeder
             "change reservation price for night",
             'delete reservations',
 
+            'show calendar',
+
             'show records',
 
             'edit hotel information',

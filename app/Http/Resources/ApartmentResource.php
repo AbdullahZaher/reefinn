@@ -29,6 +29,7 @@ class ApartmentResource extends JsonResource
             'type_id' => $this->type,
             'description_id' => $this->description,
             'price_for_night' => number_format($this->price_for_night, 2),
+            'note' => $this->note,
             'state' => $state_name,
             'state_color' => ApartmentStateColorEnum::fromName($state_name),
             'days_left' => $this->whenLoaded('currentReservation', function () {

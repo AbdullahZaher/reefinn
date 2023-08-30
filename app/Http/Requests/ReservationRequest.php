@@ -31,7 +31,7 @@ class ReservationRequest extends FormRequest
             'guest_id' => ['required', 'string', 'max:255',],
             'copy' => ['required', 'integer', 'min:0', 'max:255',],
             'guest_name' => ['required', 'string', 'max:255',],
-            'guest_phone' => ['required', 'string', 'max:255',],
+            'guest_phone' => ['required', 'string', 'max:255', 'phone:AUTO',],
             'guest_birthday' => ['required', 'date', 'date_format:Y-m-d', 'before:yesterday',],
             'number_of_companions' => ['required', 'integer', 'min:0', 'max:50',],
             'note' => ['nullable', 'string'],

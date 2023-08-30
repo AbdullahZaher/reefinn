@@ -53,10 +53,10 @@ class HandleInertiaRequests extends Middleware
                 'lang' => Session::get('locale'),
                 'dir' => Session::get('locale') == 'ar' ? 'rtl' : 'ltr',
             ],
-            'styleUrl' => asset('css/tailwind.min.css'),
             'ziggy' => function () use ($request) {
                 return array_merge((new Ziggy)->toArray(), [
                     'location' => $request->url(),
+                    'params' => $request->query(),
                 ]);
             },
         ]);

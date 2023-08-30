@@ -39,6 +39,10 @@ const emit = defineEmits(["close"]);
                 >
                 {{ apartment.price_for_night + " " + __("SAR") }}
             </div>
+            <div class="py-5 border px-6">
+                <span class="font-bold">{{ __("Note") }}:</span>
+                {{ apartment.note ?? "-" }}
+            </div>
         </div>
     </Modal>
 </template>

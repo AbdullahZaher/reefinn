@@ -29,6 +29,7 @@ class ProfileController extends Controller
             'checkout_default_time' => $settings->checkout_default_time,
             'auto_renew_after' => $settings->auto_renew_after,
             'timezone' => $settings->timezone,
+            'location' => $settings->location,
         ];
 
         $calendars = [

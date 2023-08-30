@@ -66,12 +66,12 @@ watch(
         >
             <div
                 tabindex="-1"
-                class="bg-black/70 overflow-y-auto overflow-x-hidden fixed w-full inset-0 max-h-screen"
+                class="bg-black/70 overflow-y-auto overflow-x-hidden fixed w-full inset-0 max-h-screen z-40"
                 @keydown.esc="$emit('close')"
                 v-if="open"
             >
                 <div
-                    class="mt-16 mb-24 px-4 w-full max-w-3xl mx-auto"
+                    class="mt-16 mb-24 px-4 w-full max-w-3xl mx-auto z-50"
                     v-on-click-outside="closeWhenOutside"
                     v-if="open"
                 >
@@ -82,9 +82,8 @@ watch(
                             <div
                                 class="text-2xl font-bold text-gray-900"
                                 v-if="!$slots.header && headerTitle"
-                            >
-                                {{ headerTitle }}
-                            </div>
+                                v-html="headerTitle"
+                            ></div>
 
                             <slot name="header" />
 

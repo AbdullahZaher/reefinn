@@ -23,10 +23,7 @@ const props = defineProps({
                     <div
                         class="w-14 h-14 bg-blue-400 text-white rounded-full mr-3 rtl:mr-0 rtl:ml-3 flex items-center justify-center"
                     >
-                        <FontAwesomeIcon
-                            icon="fas fa-calendar"
-                            class="text-2xl"
-                        />
+                        <FontAwesomeIcon icon="fas fa-table" class="text-2xl" />
                     </div>
                     <div class="flex flex-col justify-center">
                         <div class="text-lg font-bold">
@@ -53,10 +50,7 @@ const props = defineProps({
                         class="w-14 h-14 text-white rounded-full mr-3 rtl:mr-0 rtl:ml-3 flex items-center justify-center"
                         :class="`bg-${reservationStateColors.pending}-400`"
                     >
-                        <FontAwesomeIcon
-                            icon="fas fa-calendar"
-                            class="text-2xl"
-                        />
+                        <FontAwesomeIcon icon="fas fa-table" class="text-2xl" />
                     </div>
                     <div class="flex flex-col justify-center">
                         <div class="text-lg font-bold">
@@ -79,10 +73,7 @@ const props = defineProps({
                         class="w-14 h-14 text-white rounded-full mr-3 rtl:mr-0 rtl:ml-3 flex items-center justify-center"
                         :class="`bg-${reservationStateColors.checkin}-400`"
                     >
-                        <FontAwesomeIcon
-                            icon="fas fa-calendar"
-                            class="text-2xl"
-                        />
+                        <FontAwesomeIcon icon="fas fa-table" class="text-2xl" />
                     </div>
                     <div class="flex flex-col justify-center">
                         <div class="text-lg font-bold">
@@ -105,10 +96,7 @@ const props = defineProps({
                         class="w-14 h-14 text-white rounded-full mr-3 rtl:mr-0 rtl:ml-3 flex items-center justify-center"
                         :class="`bg-${reservationStateColors.checkout}-400`"
                     >
-                        <FontAwesomeIcon
-                            icon="fas fa-calendar"
-                            class="text-2xl"
-                        />
+                        <FontAwesomeIcon icon="fas fa-table" class="text-2xl" />
                     </div>
                     <div class="flex flex-col justify-center">
                         <div class="text-lg font-bold">
@@ -131,10 +119,7 @@ const props = defineProps({
                         class="w-14 h-14 text-white rounded-full mr-3 rtl:mr-0 rtl:ml-3 flex items-center justify-center"
                         :class="`bg-${reservationStateColors.canceled}-400`"
                     >
-                        <FontAwesomeIcon
-                            icon="fas fa-calendar"
-                            class="text-2xl"
-                        />
+                        <FontAwesomeIcon icon="fas fa-table" class="text-2xl" />
                     </div>
                     <div class="flex flex-col justify-center">
                         <div class="text-lg font-bold">

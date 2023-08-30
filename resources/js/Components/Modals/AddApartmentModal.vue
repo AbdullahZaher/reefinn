@@ -3,6 +3,7 @@ import Modal from "@/Components/Modals/Modal.vue";
 import { useForm } from "@inertiajs/vue3";
 import Loader from "@/Components/Loader.vue";
 import { __ } from "@/Composables/translations";
+import { onMounted } from "vue";
 
 const props = defineProps({
     open: {
@@ -23,6 +24,7 @@ const _form = useForm({
     type: "",
     description: "",
     price_for_night: "",
+    note: "",
 });
 
 const _submitHandler = () => {
@@ -36,6 +38,19 @@ const _submitHandler = () => {
         preserveScroll: true,
     });
 };
+
+onMounted(() => {
+    document.querySelectorAll("textarea").forEach((element) => {
+        if (element.scrollHeight > element.offsetHeight) {
+            element.style.height = element.scrollHeight + 20 + "px";
+        }
+
+        element.addEventListener("input", (event) => {
+            event.target.style.height = "auto";
+            event.target.style.height = event.target.scrollHeight + 20 + "px";
+        });
+    });
+});
 </script>
 
 <template>
@@ -136,6 +151,24 @@ const _submitHandler = () => {
                 />
                 <p class="text-sm text-red-600 mt-1">
                     {{ _form.errors.price_for_night }}
+                </p>
+            </div>
+
+            <div class="mb-6 w-full">
+                <label
+                    for="note"
+                    class="block mb-2 text-sm font-medium text-gray-900"
+                >
+                    {{ __("Note") }}
+                </label>
+                <textarea
+                    id="note"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                    maxlength="1000"
+                    v-model="_form.note"
+                ></textarea>
+                <p class="text-sm text-red-600 mt-1">
+                    {{ _form.errors.note }}
                 </p>
             </div>
 

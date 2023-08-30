@@ -46,9 +46,7 @@ const viewMode = ref(usePage().props.auth.user.view_mode);
                     <div
                         class="text-center pb-12 flex items-center justify-between flex-col lg:flex-row space-y-6 lg:space-y-0"
                     >
-                        <h1
-                            class="font-bold text-5xl font-heading text-gray-900"
-                        >
+                        <h1 class="font-bold text-5xl text-gray-900">
                             {{ __("Apartments") }}
                         </h1>
                         <button

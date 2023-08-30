@@ -1,45 +1,41 @@
 <script setup>
 import Modal from "@/Components/Modals/Modal.vue";
-import { ref, onMounted, computed } from "vue";
-import { useForm } from "@inertiajs/vue3";
+import { ref, onMounted } from "vue";
+import AddReservationModal from "@/Components/Modals/AddReservationModal.vue";
 import Swal from "sweetalert2";
-import Loader from "@/Components/Loader.vue";
 import { __ } from "@/Composables/translations";
 
 const props = defineProps({
     open: {
         type: Boolean,
     },
+    apartment: {
+        type: Object,
+        default: null,
+    },
     reservation: {
         type: Object,
     },
-    apartmentId: {
-        type: [String, Number],
+    idTypes: {
+        type: Object,
+    },
+    paymentMethods: {
+        type: Object,
     },
 });
 
 const emit = defineEmits(["close"]);
 
-const _apartments = ref([]);
-const apartments = computed(() =>
-    _apartments.value.filter((apartment) => apartment.id != props.apartmentId)
-);
+const apartments = ref([]);
 
-const _form = useForm({
-    apartment_id: "",
-});
+const apartmentIndex = ref(0);
+const apartment = ref(null);
+
+const isAddReservationModalOpen = ref(false);
 
 const _submitHandler = () => {
-    _form.clearErrors();
-
-    _form.patch(route("reservations.transfer", props.reservation.id), {
-        preserveState: false,
-        preserveScroll: true,
-        onSuccess: () => {
-            _form.reset();
-            emit("close");
-        },
-    });
+    apartment.value = apartments.value[apartmentIndex.value];
+    isAddReservationModalOpen.value = true;
 };
 
 const loading = ref(true);
@@ -47,23 +43,39 @@ const loading = ref(true);
 const getAvailableApartments = async () => {
     await axios
         .post(route("apartments.available"), {
+            apartment: props.apartment?.id,
             checkin: props.reservation.checkin,
             checkout: props.reservation.checkout,
         })
         .then((response) => {
-            if (response.data?.data.length == 0) {
-                return Swal.fire({
-                    icon: "error",
-                    title: __("Sorry..."),
-                    text: __(
-                        "There is no available apartments for this period!"
-                    ),
-                    confirmButtonText: __("Ok"),
-                }).finally(() => emit("close"));
-            }
+            if (props.apartment) {
+                if (!response.data?.status) {
+                    return Swal.fire({
+                        icon: "error",
+                        title: __("Sorry..."),
+                        text: __(
+                            "There a reservation for this apartment in this period!"
+                        ),
+                        confirmButtonText: __("Ok"),
+                    }).finally(() => emit("close"));
+                }
 
-            _apartments.value = response.data.data;
-            _form.apartment_id = apartments.value[0].id;
+                apartment.value = props.apartment;
+                isAddReservationModalOpen.value = true;
+            } else {
+                if (response.data?.data.length == 0) {
+                    return Swal.fire({
+                        icon: "error",
+                        title: __("Sorry..."),
+                        text: __(
+                            "There is no available apartments for this period!"
+                        ),
+                        confirmButtonText: __("Ok"),
+                    }).finally(() => emit("close"));
+                }
+
+                apartments.value = response.data.data;
+            }
         })
         .catch(async (e) => {
             await Swal.fire({
@@ -83,13 +95,34 @@ onMounted(async () => {
 
 <template>
     <Modal
-        :headerTitle="`${__('Transfer')} '${props.reservation.guest_name}' ${__(
-            'to another apartment'
-        )}`"
+        :headerTitle="`${__(
+            'Available apartments for this period'
+        )}: <span class='whitespace-nowrap'>(${reservation.checkin}) - (${
+            reservation.checkout
+        })</span>`"
         :open="open"
         @close="$emit('close')"
-        :clickOutsideToClose="!_form.processing"
+        :clickOutsideToClose="!isAddReservationModalOpen"
     >
+        <AddReservationModal
+            :apartment="apartment"
+            :checkin="reservation.checkin"
+            :checkout="reservation.checkout"
+            :idTypes="idTypes"
+            :paymentMethods="paymentMethods"
+            :open="isAddReservationModalOpen"
+            @close="
+                isAddReservationModalOpen = false;
+                if (props.apartment) $emit('close');
+            "
+            @closeParent="$emit('close')"
+            forceParentClose
+            v-if="
+                isAddReservationModalOpen &&
+                $page.props.auth.user.can.includes('create reservations')
+            "
+        />
+
         <div class="flex items-center justify-center my-10" v-if="loading">
             <div class="loadingio-spinner-rolling-dj99k3zvmov">
                 <div class="ldio-09hfvpy8y6h7">
@@ -107,39 +140,29 @@ onMounted(async () => {
                     {{ __("Select an apartment") }}
                     <span class="text-red-600 text-sm">*</span>
                 </label>
+
                 <select
                     id="apartments"
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 rtl"
-                    v-model="_form.apartment_id"
+                    v-model="apartmentIndex"
                 >
                     <option
-                        v-for="apartment in apartments"
+                        v-for="(apartment, index) in apartments"
                         :key="apartment.id"
-                        :value="apartment.id"
+                        :value="index"
                     >
                         {{ apartment.name }} ({{ __(apartment.type) }})
                     </option>
                 </select>
-
-                <span class="text-red-600 text-sm mt-1">
-                    {{ _form.errors.apartment_id }}
-                </span>
             </div>
 
             <div class="flex items-center justify-end ltr:ml-auto rtl:mr-auto">
                 <button
                     type="submit"
-                    class="text-white bg-blue-700 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 flex items-center justify-center space-x-2 rtl:space-x-reverse"
-                    :class="[
-                        _form.processing
-                            ? 'bg-opacity-50'
-                            : 'hover:bg-blue-800',
-                    ]"
+                    class="text-white bg-blue-700 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 flex items-center justify-center space-x-2 rtl:space-x-reverse hover:bg-blue-800"
                     @click.prevent="_submitHandler"
-                    :disabled="_form.processing"
                 >
-                    <Loader v-if="_form.processing" />
-                    <span>{{ __("Transfer") }}</span>
+                    <span>{{ __("Save") }}</span>
                 </button>
             </div>
         </form>
